@@ -57,9 +57,9 @@ int rollover(int mx, int my, int x, int y, int w, int h);
 void jump(double*y, double*vy, int*sj);
 int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double a, double b);
 void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled);
-void drawSpikes(SDL_Renderer* r, int*, int spike_nb, double size, double a_l, double a_r, Color*c, int p);
+void drawSpikes(SDL_Renderer* r, int*, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
 void drawBackground(SDL_Renderer* r, Color*c, int p);
-void spikeUpdate(int *s, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l, int*u_r, int facing);
+void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l, int*u_r, int facing);
 void drawBird(SDL_Renderer* r, bird b, int facing, Color*c, int p);
 void moveBird(bird *b, int *facing, double sp_sz);
 
@@ -146,9 +146,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     SDL_Window *w;//open a window command
     SDL_Renderer *ren;//render creation
 
-    int palette = 0;
+    //srand(time(0));
+    int palette = rand() % (PALETTE + 1);
     const double spike_size = HEIGHT/(NB_SPIKES+2);//+2 for the down and up spike border
-    int* s_y = malloc(NB_SPIKES*2*sizeof(int));
 
     bird birdy;
     birdy.x = 150;
@@ -166,8 +166,23 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     int update_l = 1;
     int update_r = 0;
     int facing = 1; //-1 if facing left, 1 if facing right
+    int spike_number = NB_SPIKES*2;//number of spikes per side
 
     //restartGame(bulbs, &d_x, &d_y, &d_vy, &d_ay, &tick_count, &palette);
+    int*temp = malloc(NB_SPIKES*sizeof(int));
+    for(int i = 0 ;i < NB_SPIKES ; i++){
+            temp[i] = 1;
+        }
+
+    drawSpikes(ren, temp, &spike_number, spike_size, app_l, app_r, colors, palette);
+    free(temp);
+    int* s_l = malloc(spike_number*sizeof(int));
+    int* s_r = malloc(spike_number*sizeof(int));
+
+    for(int i = 0 ;i < spike_number ; i++){
+            s_l[i] = 0;
+            s_r[i] = 0;
+        }
 
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -176,14 +191,16 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
                 //update positions
 
-                spikeUpdate(s_y, NB_SPIKES*2, level, &app_l, &app_r, &update_l, &update_r, facing);
+                printf("%d\n", spike_number);
+
+                spikeUpdate(s_l, s_r, NB_SPIKES*2, level, &app_l, &app_r, &update_l, &update_r, facing);
                 moveBird(&birdy, &facing, spike_size);
 
                 //draw background
                 drawBackground(ren, colors, palette);
 
                 //draw landscape
-                drawSpikes(ren, s_y, NB_SPIKES*2, spike_size, app_l, app_r, colors, palette);
+                drawSpikes(ren, s_l, &spike_number, spike_size, app_l, app_r, colors, palette);
                 //draw bird
                 drawBird(ren, birdy, facing, colors, palette);
                 color(ren, 255, 0, 0, 255);
@@ -220,7 +237,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
                 case SDL_MOUSEBUTTONDOWN:
-
+                    birdy.vy = -BIRD_JUMP_POWER;
+                    break;
                 default:
                     break; 
 
@@ -232,7 +250,10 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
         SDL_Delay(1000/FRAMES_PER_SECOND);
     }
-    free(s_y);
+    if(s_l != NULL)
+        free(s_l);
+    if(s_r != NULL)
+        free(s_r);
     closeSDL(&w, &ren);
     printf("closed successfully !\n");
     return 0;
@@ -453,7 +474,7 @@ void drawBackground(SDL_Renderer* r, Color*c, int p){
     rect(r, 0, 0, WIDTH, HEIGHT, 1);
 }
 
-void drawSpikes(SDL_Renderer* r, int*s, int spike_nb, double size, double a_l, double a_r, Color*c, int p){
+void drawSpikes(SDL_Renderer* r, int*s, int *spike_nb, double size, double a_l, double a_r, Color*c, int p){
     const double spike_size = WIDTH/(2*NB_SPIKES/3);
     //up and down :
     color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
@@ -462,8 +483,8 @@ void drawSpikes(SDL_Renderer* r, int*s, int spike_nb, double size, double a_l, d
 
     double x = spike_size;
     while(x <= WIDTH - spike_size/2){
-        triangle(r, x - spike_size/2, 0, x+spike_size/2, 0, x, spike_size, 1);
-        triangle(r, x - spike_size/2, HEIGHT, x+spike_size/2, HEIGHT, x, HEIGHT-spike_size, 1);
+        triangle(r, x - spike_size/2, 0, x+spike_size/2, 0, x, 2*spike_size/3, 1);
+        triangle(r, x - spike_size/2, HEIGHT, x+spike_size/2, HEIGHT, x, HEIGHT-2*spike_size/3, 1);
         x += spike_size;
     }
     //left and right
@@ -473,19 +494,20 @@ void drawSpikes(SDL_Renderer* r, int*s, int spike_nb, double size, double a_l, d
 
     double delta_l = (a_l)*(2*WIDTH/3 - size/4) / 100;
     double delta_r = (a_r)*(2*WIDTH/3 - size/4) / 100;
-
+    (*spike_nb) = 0;
     while(y <= HEIGHT - spike_size){
         //left
         triangle(r, 0, y - spike_size/2, 0, y + spike_size/2, spike_size - delta_l, y, 1);
         //right
         triangle(r, WIDTH, y - spike_size/2, WIDTH, y + spike_size/2, WIDTH-spike_size + delta_r, y, 1);
+        (*spike_nb)++;
         y += spike_size;
     }
 
 
 }
 
-void spikeUpdate(int *s, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l, int*u_r, int facing){
+void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l, int*u_r, int facing){
     srand(time(0));
 
 
@@ -510,8 +532,36 @@ void spikeUpdate(int *s, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l,
 
 
     int ind = 0;
-    int nb_spikes_visibles_per_side = 2 + lvl % 5;
+    int visibles = 2;
+
     //do we need to update the non-faced side for the next-next hit ?
+
+
+    if(facing == 1 && *a_l < 2 && *u_l == 0){
+        //update left spikes
+        for(int i = 0 ;i < spike_nb ; i++){
+            s_l[i] = 0;
+        }
+        while(visibles > 0){
+            do{
+                ind = rand() % spike_nb;
+            }while(s_l[ind] == 1);
+            s_l[ind] = 1;
+            visibles--;
+        }
+    }else if(facing == -1 && *a_r < 2 && *u_r == 0){
+        //update left spikes
+        for(int i = 0 ;i < spike_nb ; i++){
+            s_r[i] = 0;
+        }
+        while(visibles > 0){
+            do{
+                ind = rand() % spike_nb;
+            }while(s_r[ind] == 1);
+            s_r[ind] = 1;
+            visibles--;
+        }
+    }
 }
 
 void drawBird(SDL_Renderer* r, bird b, int facing,  Color*c, int p){
