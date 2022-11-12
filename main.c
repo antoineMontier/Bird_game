@@ -178,7 +178,6 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
                 spikeUpdate(s_y, NB_SPIKES*2, level, &app_l, &app_r, &update_l, &update_r, facing);
                 moveBird(&birdy, &facing, spike_size);
-                printf("%d\n", facing);
 
                 //draw background
                 drawBackground(ren, colors, palette);
@@ -212,7 +211,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                             break;
 
                         case SDLK_SPACE:
-
+                            birdy.vy = -BIRD_JUMP_POWER;
                             break;
 
                         default:
@@ -546,7 +545,7 @@ void moveBird(bird *b, int *facing, double sp_sz){
         b->vx = BIRD_SPEED;
     else if(*facing == -1)
         b->vx = -BIRD_SPEED;
-    //b->vy += GRAVITY/1000.0;
+    b->vy += GRAVITY/1000.0;
     b->x += b->vx;
     b->y += b->vy;
 }
