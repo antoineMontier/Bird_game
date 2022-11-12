@@ -16,13 +16,14 @@
 #define PALETTE 4
 #define NB_SPIKES 10 
 #define SPIKE_SPACE_PX 20
+#define GRAVITY 981
+#define BIRD_SPEED 8
 
 typedef struct{
     double x;
     double y;
     double vx;
     double vy;
-    int facing; //-1 if facing left, 1 if facing right
 }bird;
 
 typedef struct{
@@ -59,6 +60,8 @@ void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, i
 void drawSpikes(SDL_Renderer* r, int*, int spike_nb, double size, double a_l, double a_r, Color*c, int p);
 void drawBackground(SDL_Renderer* r, Color*c, int p);
 void spikeUpdate(int *s, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l, int*u_r, int facing);
+void drawBird(SDL_Renderer* r, bird b, int facing, Color*c, int p);
+void moveBird(bird *b, int *facing, double sp_sz);
 
 
 
@@ -147,8 +150,11 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     const double spike_size = HEIGHT/(NB_SPIKES+2);//+2 for the down and up spike border
     int* s_y = malloc(NB_SPIKES*2*sizeof(int));
 
-    
-
+    bird birdy;
+    birdy.x = 150;
+    birdy.y = 300;
+    birdy.vx = 0;
+    birdy.vy = 0;
 
 
     openSDL(WIDTH, HEIGHT, 0, &w, &ren);
@@ -159,7 +165,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     double app_r = 21;
     int update_l = 1;
     int update_r = 0;
-    int facing = 1;
+    int facing = 1; //-1 if facing left, 1 if facing right
 
     //restartGame(bulbs, &d_x, &d_y, &d_vy, &d_ay, &tick_count, &palette);
 
@@ -171,14 +177,18 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 //update positions
 
                 spikeUpdate(s_y, NB_SPIKES*2, level, &app_l, &app_r, &update_l, &update_r, facing);
+                moveBird(&birdy, &facing, spike_size);
                 printf("%d\n", facing);
+
                 //draw background
                 drawBackground(ren, colors, palette);
 
                 //draw landscape
                 drawSpikes(ren, s_y, NB_SPIKES*2, spike_size, app_l, app_r, colors, palette);
                 //draw bird
-
+                drawBird(ren, birdy, facing, colors, palette);
+                color(ren, 255, 0, 0, 255);
+                mark(ren, birdy.x, birdy.y, 4);
 
 
                 //printRestartButton(ren, colors, palette);
@@ -202,10 +212,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                             break;
 
                         case SDLK_SPACE:
-                            if(facing == -1)
-                                facing = 1;
-                            else if(facing == 1)
-                                facing = -1;
+
                             break;
 
                         default:
@@ -506,46 +513,47 @@ void spikeUpdate(int *s, int spike_nb, int lvl, double*a_l, double*a_r, int*u_l,
     int ind = 0;
     int nb_spikes_visibles_per_side = 2 + lvl % 5;
     //do we need to update the non-faced side for the next-next hit ?
-    if(facing == -1){
-        (*u_l) = 0; 
-        if(*u_r == 0){
-            //update right positions
-            for(int i = spike_nb/2 ; i < spike_nb ; i++){
-                s[i] = 0;
-            }
-
-            while(nb_spikes_visibles_per_side > 0){
-                do{
-                    ind = spike_nb/2 + rand() % (spike_nb/2);
-                }while(s[ind] == 1);
-                s[ind] = 1;
-                nb_spikes_visibles_per_side--;
-            }
-
-            *u_r = 1;
-        }
-    }else if(facing == 1){
-        (*u_r) = 0;
-        if(*u_l == 0){
-            //update left positions
-            for(int i = 0; i < spike_nb/2 ; i++){
-                s[i] = 0;
-            }
-
-            while(nb_spikes_visibles_per_side > 0){
-                do{
-                    ind = rand() % (spike_nb/2);
-                }while(s[ind] == 1);
-                s[ind] = 1;
-                nb_spikes_visibles_per_side--;
-            }
-            *u_l = 1;
-        }
-    }
-
-
-
-
 }
+
+void drawBird(SDL_Renderer* r, bird b, int facing,  Color*c, int p){
+    color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
+    rect(r, b.x, b.y, BIRD_WIDTH, BIRD_WIDTH, 1);
+    color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
+    if(facing == 1){
+        triangle(r, b.x + 4.8*BIRD_WIDTH/5, 
+                    b.y + 1.2*BIRD_WIDTH/5,//top
+                    b.x + 4.8*BIRD_WIDTH/5,
+                    b.y + 3.2*BIRD_WIDTH/5,//down
+                    b.x + 6*BIRD_WIDTH/5,
+                    b.y + 2.2*BIRD_WIDTH/5, 1);//middle
+    }else if(facing == -1){
+        triangle(r, b.x +0.2*BIRD_WIDTH/5, 
+                    b.y + 1.2*BIRD_WIDTH/5,//top
+                    b.x +0.2*BIRD_WIDTH/5,
+                    b.y + 3.2*BIRD_WIDTH/5,//down
+                    b.x -1*BIRD_WIDTH/5,
+                    b.y + 2.2*BIRD_WIDTH/5, 1);//middle
+    }
+}
+
+void moveBird(bird *b, int *facing, double sp_sz){
+    if(*facing == 1 && ((b->x + BIRD_WIDTH ) > (WIDTH - sp_sz/4)))
+        *facing = -1;
+    else if(*facing == -1 && ((b->x ) < sp_sz/4))
+        *facing = 1;
+
+    if(*facing == 1)
+        b->vx = BIRD_SPEED;
+    else if(*facing == -1)
+        b->vx = -BIRD_SPEED;
+    //b->vy += GRAVITY/1000.0;
+    b->x += b->vx;
+    b->y += b->vy;
+}
+
+
+
+
+
 
 
