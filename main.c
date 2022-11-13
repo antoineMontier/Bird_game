@@ -197,10 +197,16 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 //printf("%d\n", facing);
 
 
-                if(facing == 1 && prev_facing == -1)
+                if(facing == -1 && prev_facing == 1)
                     update_r = 1;
-                else if(facing == -1 && prev_facing ==1)
+                else if(facing == 1 && prev_facing == -1)
                     update_l = 1;
+
+
+                if(update_l)
+                    printf("left has to be updated\n");
+                if(update_r)
+                    printf("right has to be updated\n");
                 
                 prev_facing = facing;
                 moveBird(&birdy, &facing, spike_size);
@@ -528,20 +534,20 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
     if(facing == 1){
     //clear the non faced spikes :
         if(*a_r > 0)
-            (*a_r)--;
+            (*a_r)-=2;
     //appear the faced spikes : 
         if(*a_l < 21)
-            (*a_l)++;
+            (*a_l)+=2;
     }
 
 
      if(facing == -1){
     //clear the non faced spikes :
         if(*a_l > 0)
-            (*a_l)--;
+            (*a_l)-=2;
     //appear the faced spikes : 
         if(*a_r < 21)
-            (*a_r)++;
+            (*a_r)+=2;
     }
 
 
@@ -551,8 +557,9 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
     //do we need to update the non-faced side for the next-next hit ?
     //only if u_l and u_r are non equal to 0
 
-    if(*u_l == 1 && *a_l < 1){
+    if(*u_l == 1 && *a_r < 1){
         //update left spikes
+        printf("update of left side\n");
         for(int i = 0 ;i < spike_nb ; i++){
             s_l[i] = 0;
         }
@@ -564,8 +571,9 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
             visibles--;
         }
         *u_l = 0;
-    }else if(*u_r == 1 && *a_r < 1){
+    }else if(*u_r == 1 && *a_l < 1){
         //update left spikes
+        printf("update of right side\n");
         for(int i = 0 ;i < spike_nb ; i++){
             s_r[i] = 0;
         }
@@ -615,10 +623,3 @@ void moveBird(bird *b, int *facing, double sp_sz){
     b->x += b->vx;
     b->y += b->vy;
 }
-
-
-
-
-
-
-
