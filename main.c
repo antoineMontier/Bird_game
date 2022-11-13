@@ -18,7 +18,7 @@
 #define SPIKE_SPACE_PX 20
 #define GRAVITY 981
 #define BIRD_SPEED 8
-#define ADD_SPIKE_EVERY 6
+#define ADD_SPIKE_EVERY 10
 #define WING_SPEED 7
 
 typedef struct{
@@ -514,7 +514,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 
 
 }
-//bug of spike generation, inifite loop :/
+
 void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int *u_l, int *u_r){
     srand(time(0));
 
@@ -541,6 +541,10 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
 
     int ind = 0;
     int visibles = 1 + lvl / ADD_SPIKE_EVERY;//number of actives spikes
+
+    if(visibles >= spike_nb){
+        visibles = -1;
+    }
 
     //do we need to update the non-faced side for the next-next hit ?
     //only if u_l and u_r are non equal to 0
@@ -676,6 +680,7 @@ void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz){
     b->x += b->vx;
     b->y += b->vy;
 }
+
 int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb){
     const double spike_size = WIDTH/(2*NB_SPIKES/3);
     //3 controls points : up edge ; low edge ; middle
