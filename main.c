@@ -59,7 +59,7 @@ int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double 
 void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled);
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
 void drawBackground(SDL_Renderer* r, Color*c, int p);
-void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int prev_facing, int facing);
+void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
 void drawBird(SDL_Renderer* r, bird b, int facing, Color*c, int p);
 void moveBird(bird *b, int *facing, double sp_sz);
 
@@ -163,6 +163,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     int level = 0;
     double app_l = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_r = 21;
+    int update_l = 0;
+    int update_r = 0;
     int prev_facing = 1;
     int facing = 1; //-1 if facing left, 1 if facing right
     int spike_number = NB_SPIKES*2;//number of spikes per side
@@ -193,10 +195,17 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 //update positions
 
                 //printf("%d\n", facing);
+
+
+                if(facing == 1 && prev_facing == -1)
+                    update_r = 1;
+                else if(facing == -1 && prev_facing ==1)
+                    update_l = 1;
+                
                 prev_facing = facing;
                 moveBird(&birdy, &facing, spike_size);
                 //printf("%d : %d\n", facing, prev_facing);
-                spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, prev_facing, facing);
+                spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
 
                 //draw background
                 drawBackground(ren, colors, palette);
@@ -512,7 +521,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 
 }
 
-void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int prev_facing, int facing){
+void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int *u_l, int *u_r){
     srand(time(0));
 
 
@@ -529,10 +538,10 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
      if(facing == -1){
     //clear the non faced spikes :
         if(*a_l > 0)
-            (*a_l)-= 2;
+            (*a_l)--;
     //appear the faced spikes : 
         if(*a_r < 21)
-            (*a_r)+= 2;
+            (*a_r)++;
     }
 
 
@@ -540,11 +549,9 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
     int visibles = 5;
 
     //do we need to update the non-faced side for the next-next hit ?
-    //only if facing and prev_facing are different, 
-    if(facing == prev_facing)
-        return;
+    //only if u_l and u_r are non equal to 0
 
-    if(facing == 1 && prev_facing == -1){
+    if(*u_l == 1 && *a_l < 1){
         //update left spikes
         for(int i = 0 ;i < spike_nb ; i++){
             s_l[i] = 0;
@@ -556,7 +563,8 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
             s_l[ind] = 1;
             visibles--;
         }
-    }else if(facing == -1 && prev_facing ==1){
+        *u_l = 0;
+    }else if(*u_r == 1 && *a_r < 1){
         //update left spikes
         for(int i = 0 ;i < spike_nb ; i++){
             s_r[i] = 0;
@@ -568,6 +576,7 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
             s_r[ind] = 1;
             visibles--;
         }
+        *u_r = 0;
     }
 }
 
