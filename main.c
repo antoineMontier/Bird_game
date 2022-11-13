@@ -64,7 +64,7 @@ void drawBackground(SDL_Renderer* r, Color*c, int p);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
 void moveBird(bird *b, int *facing, int* lvl, double sp_sz);
-
+int birdTouchSpike(SDL_Renderer* r, bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
 
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm $(sdl2-config --cflags --libs) && ./main
@@ -171,6 +171,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     int facing = 1; //-1 if facing left, 1 if facing right
     int spike_number = NB_SPIKES*2;//number of spikes per side
     int jumped = 0;
+    int alive = 1;
 
     //restartGame(bulbs, &d_x, &d_y, &d_vy, &d_ay, &tick_count, &palette);
     int*temp = malloc(NB_SPIKES*sizeof(int));
@@ -198,38 +199,33 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     while(program_launched){//principal loop
         SDL_Event evt;
                 
-                //update positions
 
-                //printf("%d\n", facing);
-
-
-                if(facing == -1 && prev_facing == 1)
-                    update_r = 1;
-                else if(facing == 1 && prev_facing == -1)
-                    update_l = 1;
-                
-                prev_facing = facing;
-                moveBird(&birdy, &facing, &level, spike_size);
-                //printf("%d : %d\n", facing, prev_facing);
-                spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
-
-                //draw background
-                drawBackground(ren, colors, palette);
-
-                //draw landscape
-
-
-                drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
-                //draw bird
-                drawBird(ren, birdy, facing, &jumped, colors, palette);
-                
-
-
-                //printRestartButton(ren, colors, palette);
+        if(alive){
+            //update positions
+            if(facing == -1 && prev_facing == 1)
+                update_r = 1;
+            else if(facing == 1 && prev_facing == -1)
+                update_l = 1;
             
-                SDL_RenderPresent(ren);//refresh the render
+            prev_facing = facing;
+            moveBird(&birdy, &facing, &level, spike_size);
+            spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
+            //draw background
+            drawBackground(ren, colors, palette);
+            //draw landscape
+            drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
+            //draw bird
+            drawBird(ren, birdy, facing, &jumped, colors, palette);
+            if(birdTouchSpike(ren, birdy, facing, spike_size, s_l, s_r, spike_number))
+                alive = 0;
+           // printf("%f, %f\n", app_l, app_r);
 
 
+        }else{
+            //printRestartButton(ren, colors, palette);
+            printf("died\n");
+
+        }
         //controls
         while(SDL_PollEvent(&evt)){//reads all the events (mouse moving, key pressed...)        //possible to wait for an event with SDL_WaitEvent
             switch(evt.type){
@@ -268,6 +264,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         tick_count++;
         
         SDL_Delay(1000/FRAMES_PER_SECOND);
+        SDL_RenderPresent(ren);//refresh the render
+
     }
 
     closeSDL(&w, &ren);
@@ -526,7 +524,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 
 
 }
-
+//bug of spike generation, inifite loop :/
 void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int *u_l, int *u_r){
     srand(time(0));
 
@@ -677,8 +675,63 @@ void moveBird(bird *b, int *facing, int* lvl, double sp_sz){
     b->x += b->vx;
     b->y += b->vy;
 }
+//remove SDL8Renderer when the function is working
+int birdTouchSpike(SDL_Renderer* r, bird b, int facing, int size, int *s_l, int*s_r, int spike_nb){
+    const double spike_size = WIDTH/(2*NB_SPIKES/3);
+    //3 controls points : up edge ; low edge ; middle
+    double x1, x2, x3, y1, y2, y3;
+    if(facing == 1){//right
+        x1 = b.x + BIRD_WIDTH;
+        y1 = b.y;
+        x2 = b.x + BIRD_WIDTH;
+        y2 = b.y + BIRD_HEIGHT/2;
+        x3 = b.x + BIRD_WIDTH;
+        y3 = b.y + BIRD_HEIGHT;
+    }else if(facing == -1){
+        x1 = b.x;
+        y1 = b.y;
+        x2 = b.x;
+        y2 = b.y + BIRD_HEIGHT/2;
+        x3 = b.x;
+        y3 = b.y + BIRD_HEIGHT;
+    }
 
+    color(r, 255, 0, 0, 255);
+    mark(r, x1, y1, 3);
+    mark(r, x2, y2, 3);
+    mark(r, x3, y3, 3);
+    /*
+    double delta_l = (a_l)*(2*WIDTH/3 - size/4) / 100;//a_l is at his max : //delta_l is equal to 0 because a_r and a_r are supposed equals to 0
+    double delta_r = (a_r)*(2*WIDTH/3 - size/4) / 100;//a_r is at his max : //delta_r is equal to 0 because a_r and a_r are supposed equals to 0
+    */
+    double y = 1.5*spike_size;
+    for(int i = 0 ; i < spike_nb ; i++){
+        //left check
+        if(facing == -1 && s_l[i] == 1){
+            mark(r, 0 + 30, y , 5);
+            if(dist(0, y, x1, y1) <= spike_size/2)
+                return 1;//true
+            if(dist(0, y, x1, y1) <= spike_size/2)
+                return 1;//true
+            if(dist(0, y, x1, y1) <= spike_size/2)
+                return 1;//true
+        }
+        //right check
+        if(facing == 1 && s_r[i] == 1){
+            mark(r, WIDTH - 30, y, 5);
+            if(dist(WIDTH, y, x1, y1) <= spike_size/2)
+                return 1;//true
+            if(dist(WIDTH, y, x1, y1) <= spike_size/2)
+                return 1;//true
+            if(dist(WIDTH, y, x1, y1) <= spike_size/2)
+                return 1;//true
+        }
+        y += spike_size;
+    }
 
+    return 0;
+
+}
 
 
 
