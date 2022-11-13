@@ -63,7 +63,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 void drawBackground(SDL_Renderer* r, Color*c, int p);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
-void moveBird(bird *b, int *facing, int* lvl, double sp_sz);
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz);
 int birdTouchSpike(SDL_Renderer* r, bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
 
 
@@ -208,7 +208,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 update_l = 1;
             
             prev_facing = facing;
-            moveBird(&birdy, &facing, &level, spike_size);
+            moveBird(&birdy, &facing, &level, spike_size, spike_size);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
             //draw background
             drawBackground(ren, colors, palette);
@@ -658,7 +658,7 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p){
     }
 }
 
-void moveBird(bird *b, int *facing, int* lvl, double sp_sz){
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz){
     if(*facing == 1 && ((b->x + BIRD_WIDTH ) > (WIDTH - sp_sz/4))){
         *facing = -1;
         (*lvl)++;
@@ -666,6 +666,17 @@ void moveBird(bird *b, int *facing, int* lvl, double sp_sz){
         *facing = 1;
         (*lvl)++;
     }
+
+    if(b->y <= size/4)
+        b->vy = abs(b->vy)*0.9;//little loss of speed when bouncing
+    else if(b->y + BIRD_HEIGHT > HEIGHT - size/4)
+        b->vy = -abs(b->vy)*0.9;//little loss of speed when bouncing
+
+    if(b->y + BIRD_HEIGHT > HEIGHT)
+        b->vy = -BIRD_SPEED;
+    else if(b->y < 0)
+        b->vy = BIRD_SPEED;
+
 
     if(*facing == 1)
         b->vx = BIRD_SPEED;
@@ -677,26 +688,25 @@ void moveBird(bird *b, int *facing, int* lvl, double sp_sz){
 }
 //remove SDL8Renderer when the function is working
 int birdTouchSpike(SDL_Renderer* r, bird b, int facing, int size, int *s_l, int*s_r, int spike_nb){
+    color(r, 255, 0, 0, 255);
+
     const double spike_size = WIDTH/(2*NB_SPIKES/3);
     //3 controls points : up edge ; low edge ; middle
     double x1, x2, x3, y1, y2, y3;
     if(facing == 1){//right
         x1 = b.x + BIRD_WIDTH;
-        y1 = b.y;
         x2 = b.x + BIRD_WIDTH;
-        y2 = b.y + BIRD_HEIGHT/2;
         x3 = b.x + BIRD_WIDTH;
-        y3 = b.y + BIRD_HEIGHT;
     }else if(facing == -1){
         x1 = b.x;
-        y1 = b.y;
         x2 = b.x;
-        y2 = b.y + BIRD_HEIGHT/2;
         x3 = b.x;
-        y3 = b.y + BIRD_HEIGHT;
     }
+    y1 = b.y;
+    y2 = b.y + BIRD_HEIGHT/2;
+    y3 = b.y + BIRD_HEIGHT;
 
-    color(r, 255, 0, 0, 255);
+
     mark(r, x1, y1, 3);
     mark(r, x2, y2, 3);
     mark(r, x3, y3, 3);
@@ -705,29 +715,55 @@ int birdTouchSpike(SDL_Renderer* r, bird b, int facing, int size, int *s_l, int*
     double delta_r = (a_r)*(2*WIDTH/3 - size/4) / 100;//a_r is at his max : //delta_r is equal to 0 because a_r and a_r are supposed equals to 0
     */
     double y = 1.5*spike_size;
+    //printf("for i in range 0 to %d\n", spike_nb);
     for(int i = 0 ; i < spike_nb ; i++){
         //left check
         if(facing == -1 && s_l[i] == 1){
-            mark(r, 0 + 30, y , 5);
-            if(dist(0, y, x1, y1) <= spike_size/2)
+            //mark(r, 0 + 30, y , 5);
+            //circle(r, size/4, y, 9*spike_size/30, 0);
+            if(dist(size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(0, y, x1, y1) <= spike_size/2)
+            if(dist(size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(0, y, x1, y1) <= spike_size/2)
+            if(dist(size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
         }
         //right check
         if(facing == 1 && s_r[i] == 1){
-            mark(r, WIDTH - 30, y, 5);
-            if(dist(WIDTH, y, x1, y1) <= spike_size/2)
+            //mark(r, WIDTH - 30, y, 5);
+            //circle(r, WIDTH - size/4, y, 9*spike_size/30, 0);
+            if(dist(WIDTH - size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(WIDTH, y, x1, y1) <= spike_size/2)
+            if(dist(WIDTH - size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(WIDTH, y, x1, y1) <= spike_size/2)
+            if(dist(WIDTH - size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
         }
         y += spike_size;
     }
+
+
+    double x = spike_size;
+    while(x <= WIDTH - spike_size/2){
+        //up
+        
+
+        mark(r, x, size/4, 3);
+        circle(r, x, size/4, 9*spike_size/30, 0);
+        line(r, 0, size/4, WIDTH, size/4);
+
+        //down
+        mark(r, x, HEIGHT - size/4, 3);
+        circle(r, x, HEIGHT - size/4, 9*spike_size/30, 0);
+        line(r, 0, HEIGHT - size/4, WIDTH, HEIGHT - size/4);
+
+
+        //triangle(r, x - spike_size/2, 0, x+spike_size/2, 0, x, 2*spike_size/3, 1);
+        //triangle(r, x - spike_size/2, HEIGHT, x+spike_size/2, HEIGHT, x, HEIGHT-2*spike_size/3, 1);
+        x += spike_size;
+    }
+
+
 
     return 0;
 
