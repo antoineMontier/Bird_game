@@ -65,7 +65,7 @@ void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r,
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*jumped, int*alive);
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*alive);
 
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm $(sdl2-config --cflags --libs) && ./main
@@ -158,9 +158,11 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     bird birdy;
     double app_r = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_l = 21;                  //-1 if facing left, 1 if facing right
-    int jumped, alive = 0, prev_facing, facing = 1, update_r, update_l, level, tick_count, palette = rand() % (PALETTE + 1), k = 0,spike_number = NB_SPIKES*2;
+    int jumped, alive = 0, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0,spike_number = NB_SPIKES*2;
 
-    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, &jumped, &alive);
+
+ 
+
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -169,16 +171,11 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     drawSpikes(ren, temp, temp, &spike_number, spike_size, app_l, app_r, colors, palette);
     free(temp);
 
+
     int* s_l = malloc(spike_number*sizeof(int));
     int* s_r = malloc(spike_number*sizeof(int));
+    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &alive);
 
-    for(int i = 0 ;i < spike_number ; i++){
-        s_l[i] = 0;
-        s_r[i] = 0;
-    }
-
-    s_r[rand() % spike_number] = 1;
-    s_l[rand() % spike_number] = 1;
 
     
     drawBackground(ren, colors, palette);
@@ -187,7 +184,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //draw bird
     drawBird(ren, birdy, facing, &jumped, colors, palette);
 
-
+    alive = 0;
 
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -213,7 +210,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         }else{
             printRestartButton(ren, colors, palette);
             if(k){
-                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, &jumped, &alive);
+                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &alive);
                 k = 0;
             }
         }
@@ -243,8 +240,10 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if(alive)
+                    if(alive){
                         birdy.vy = -BIRD_JUMP_POWER;
+                        jumped = 90;
+                    }
                     if(!alive)
                         k = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT);
                     break;
@@ -599,7 +598,7 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p){
     point(r, b.x + BIRD_WIDTH-2, b.y + BIRD_HEIGHT -1);
     point(r, b.x + BIRD_WIDTH-1, b.y + BIRD_HEIGHT -2);
 
-    
+    printf("%d\n", *j);
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
     //========================================================================================
@@ -759,7 +758,7 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
 
 }
 
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*jumped, int*alive){
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*alive){
     //reset bird
     b->x = WIDTH/2 - BIRD_WIDTH/2;
     b->y = HEIGHT/3 - BIRD_HEIGHT/2;
@@ -774,16 +773,27 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
     *u_r = 0;
     *u_l = 0;
 
+    for(int i = 0 ;i < sn ; i++){
+        s_l[i] = 0;
+        s_r[i] = 0;
+    }
 
-    //update color :
+
+
+
+    *jumped = 0;
+    *alive = 1;
+    if(*lvl == 0)
+        return;
+
+    *lvl = 0;
+
+
+        //update color :
     int k = *palette;
     do{
         *palette = rand() % (PALETTE);
     }while(*palette == k);
-
-    *jumped = 0;
-    *alive = 1;
-    *lvl = 0;
 
 }
 
