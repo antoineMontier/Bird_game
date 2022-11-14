@@ -66,7 +66,9 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
 void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*alive);
-
+double min(double a, double b, double c);
+double max(double a, double b, double c);
+void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm $(sdl2-config --cflags --libs) && ./main
 
@@ -365,9 +367,9 @@ double dist(double x1, double y1, double x2, double y2){
 
 void printRestartButton(SDL_Renderer* r, Color*c, int p){
     color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
-    rect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 1);
+    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 1, BUTTON_HEIGHT/3);
     color(r, 20, 20, 20, 255);
-    rect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 0);
+    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 0,  BUTTON_HEIGHT/3);
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
 
@@ -764,8 +766,165 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
 
 }
 
+void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve){
+    if(curve <= 0){
+        if(filled){
+            int a = x, b = y;
+            for(int a = x ; a <= x + width ; a++){
+                for(int b = y ; b <= y + height ; b++){
+                    point(r, a, b);
+                }
+            }
+            return;
+        }else{
+            line(r, x, y, x + width, y);
+            line(r, x, y, x, y + height);
+            line(r, x + width, y + height, x + width, y);
+            line(r, x + width, y + height, x , y + height);
+            return;
+        }
+    }
+
+    int smaller = 1;// = -1 if it's height ; 1 if it's width or equal
+    if(width > height){
+        smaller =-1;
+    }
+    if(curve >= width/2 || curve >= height/2){//if curve is at its max value
+        curve = min(width/2, height/2, height);
+    }
+
+    //here curve is between 1 and it's max :
+    if(filled){
+        if(smaller == -1){//long rectangle
+            //draw the middle part :
+            roundRect(r, x + curve, y, width - 2*curve, height, 1, 0);
+            //fill the left gap :
+            roundRect(r, x, y + curve, curve, height - curve*2, 1, 0);
+            //fill the right gap
+            roundRect(r, x + width - curve, y + curve, curve, height - 2*curve, 1, 0);
+
+            //fill the top left :
+            circle(r, x + curve, y + curve, curve, 1);
+
+            //fill the top right :
+            circle(r, x + width -curve, y + curve, curve, 1);
+
+            //fill the bottom right :
+            circle(r, x + width -curve, y +height- curve, curve, 1);
+
+            //fill the bottom left :
+            circle(r, x +  curve, y + height - curve, curve, 1);
+        }else if(smaller == 1){//high rectangle
+            //draw the middle part :
+            roundRect(r, x, y + curve, width, height - curve*2, 1, 0);
+            //fill the upper gap :
+            roundRect(r, x + curve, y, width - 2* curve, curve, 1, 0);
+            //fill the bottom gap :
+            roundRect(r, x + curve, y + height - curve, width - 2* curve, curve, 1, 0);
+
+            //fill the top left :
+            circle(r, x + curve, y + curve, curve, 1);
+
+            //fill the top right :
+            circle(r, x + width -curve, y + curve, curve, 1);
+
+            //fill the bottom right :
+            circle(r, x + width -curve, y +height- curve, curve, 1);
+
+            //fill the bottom left :
+            circle(r, x +  curve, y + height - curve, curve, 1);
+        }
 
 
 
+    }else if(filled == 0){
+        if(smaller == -1){//long rectangle
+            //draw the middle part :
+            line(r, x + curve, y, x + width - curve, y);//top
+            line(r, x + curve, y + height, x + width - curve, y + height);//bottom
+            line(r, x, y+ curve, x, y + height - curve);//left
+            line(r, x + width, y+ curve, x + width, y + height - curve);//right
 
+            double precision = 0.5;
+
+            //top left
+            for(int a = x ; a <= x + curve ; a++){
+                for(int b = y ; b <= y + curve ; b++){
+                    if(dist(a, b, x + curve, y+curve) <= curve + precision && dist(a, b, x + curve, y+curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+            //bottom left
+            for(int a = x ; a <= x + curve ; a++){
+                for(int b = y + height - curve; b <= y + height ; b++){
+                    if(dist(a, b, x + curve, y+ height - curve) <= curve + precision && dist(a, b, x + curve, y+height - curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+            //top right
+            for(int a = x + width - curve ; a <= x + width ; a++){
+                for(int b = y ; b <= y + curve ; b++){
+                    if(dist(a, b, x + width - curve, y+curve) <= curve + precision && dist(a, b, x + width - curve, y+curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+            //top left
+            for(int a = x + width - curve ; a <= x + width ; a++){
+                for(int b = y + height - curve; b <= y + height ; b++){
+                    if(dist(a, b, x + width - curve, y+height-curve) <= curve + precision && dist(a, b, x + width - curve, y+height-curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+
+
+        }else if(smaller == 1){//high rectangle
+
+            //draw the middle part :
+            line(r, x + curve, y, x + width - curve, y);//top
+            line(r, x + curve, y + height, x + width - curve, y + height);//bottom
+            line(r, x, y+ curve, x, y + height - curve);//left
+            line(r, x + width, y+ curve, x + width, y + height - curve);//right
+
+            double precision = 0.5;
+
+            //top left
+            for(int a = x ; a <= x + curve ; a++){
+                for(int b = y ; b <= y + curve ; b++){
+                    if(dist(a, b, x + curve, y+curve) <= curve + precision && dist(a, b, x + curve, y+curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+            //bottom left
+            for(int a = x ; a <= x + curve ; a++){
+                for(int b = y + height - curve; b <= y + height ; b++){
+                    if(dist(a, b, x + curve, y+ height - curve) <= curve + precision && dist(a, b, x + curve, y+height - curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+            //top right
+            for(int a = x + width - curve ; a <= x + width ; a++){
+                for(int b = y ; b <= y + curve ; b++){
+                    if(dist(a, b, x + width - curve, y+curve) <= curve + precision && dist(a, b, x + width - curve, y+curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+            //top left
+            for(int a = x + width - curve ; a <= x + width ; a++){
+                for(int b = y + height - curve; b <= y + height ; b++){
+                    if(dist(a, b, x + width - curve, y+height-curve) <= curve + precision && dist(a, b, x + width - curve, y+height-curve) >= curve - precision)
+                        point(r, a, b);
+                }
+            }
+
+        }
+    }
+
+}
 
