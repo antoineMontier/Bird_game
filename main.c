@@ -310,51 +310,19 @@ void rect(SDL_Renderer* r, int x, int y, int width, int height, int filled){
 }
 
 void circle(SDL_Renderer * r, int cx, int cy, int radius, int filled){
-   const int diameter = (radius * 2);
-
-   int x = (radius - 1);
-   int y = 0;
-   int tx = 1;
-   int ty = 1;
-   int error = (tx - diameter);
-
-   while (x >= y){
-      //  Each of the following renders an octant of the circle
-      SDL_RenderDrawPoint(r, cx + x, cy - y);
-      SDL_RenderDrawPoint(r, cx + x, cy + y);
-      SDL_RenderDrawPoint(r, cx - x, cy - y);
-      SDL_RenderDrawPoint(r, cx - x, cy + y);
-      SDL_RenderDrawPoint(r, cx + y, cy - x);
-      SDL_RenderDrawPoint(r, cx + y, cy + x);
-      SDL_RenderDrawPoint(r, cx - y, cy - x);
-      SDL_RenderDrawPoint(r, cx - y, cy + x);
-
-      if (error <= 0){
-         ++y;
-         error += ty;
-         ty += 2;
-      }
-
-      if (error > 0){
-         --x;
-         tx += 2;
-         error += (tx - diameter);
-      }
-   }
-
-    if(filled){
-        int s_x = cx - radius;
-        int s_y = cy - radius;
-        int f_x = cx + radius;
-        int f_y = cy + radius;
-
-        for(int a = s_x ; a <= f_x ; a++){
-            for(int b = s_y ; b <= f_y ; b++){
-                if(dist(cx, cy, a, b) < radius)
+    double precision = 0.5;
+    for(int a = cx - radius; a <= cx + radius ; a++){
+        for(int b = cy-radius ; b <= cy+radius ; b++){
+            if(filled){
+                if(dist(a, b, cx, cy) <= radius)
+                    point(r, a, b);
+            }else{
+                if(dist(a, b, cx, cy) <= radius + precision && dist(a, b, cx, cy) >= radius - precision)
                     point(r, a, b);
             }
         }
     }
+   
 
 }
 
@@ -598,7 +566,6 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p){
     point(r, b.x + BIRD_WIDTH-2, b.y + BIRD_HEIGHT -1);
     point(r, b.x + BIRD_WIDTH-1, b.y + BIRD_HEIGHT -2);
 
-    printf("%d\n", *j);
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
     //========================================================================================
@@ -796,7 +763,6 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
     }while(*palette == k);
 
 }
-
 
 
 
