@@ -373,11 +373,11 @@ void printRestartButton(SDL_Renderer* r, Color*c, int p){
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
 
-    triangle(r  , WIDTH/2 -  BUTTON_WIDTH/2 +  BUTTON_WIDTH/5
-                , HEIGHT/2 - BUTTON_HEIGHT/2 + BUTTON_HEIGHT/5
-                , WIDTH/2 -  BUTTON_WIDTH/2 +  BUTTON_WIDTH/5
-                , HEIGHT/2 - BUTTON_HEIGHT/2 + 4*BUTTON_HEIGHT/5
-                , WIDTH/2 -  BUTTON_WIDTH/2 +  4*BUTTON_WIDTH/5
+    triangle(r  , WIDTH/2 -  BUTTON_WIDTH/2 +  3*BUTTON_WIDTH/10
+                , HEIGHT/2 - BUTTON_HEIGHT/2 + 3*BUTTON_HEIGHT/10
+                , WIDTH/2 -  BUTTON_WIDTH/2 +  3*BUTTON_WIDTH/10
+                , HEIGHT/2 - BUTTON_HEIGHT/2 + 7*BUTTON_HEIGHT/10
+                , WIDTH/2 -  BUTTON_WIDTH/2 +  7.5*BUTTON_WIDTH/10
                 , HEIGHT/2
                 , 1);
 
@@ -548,25 +548,7 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
 
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p){
     color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
-    rect(r, b.x, b.y, BIRD_WIDTH, BIRD_WIDTH, 1);
-    //round the corners
-    color(r, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b, 255);
-    //left up
-    point(r, b.x, b.y);
-    point(r, b.x +1, b.y);
-    point(r, b.x, b.y+1);
-    //right up
-    point(r, b.x + BIRD_WIDTH-1, b.y);
-    point(r, b.x + BIRD_WIDTH-2, b.y);
-    point(r, b.x + BIRD_WIDTH-1, b.y+1);
-    //left down
-    point(r, b.x, b.y + BIRD_HEIGHT - 1);
-    point(r, b.x +1, b.y + BIRD_HEIGHT - 1);
-    point(r, b.x, b.y + BIRD_HEIGHT - 2);
-    //right down
-    point(r, b.x + BIRD_WIDTH-1, b.y + BIRD_HEIGHT -1);
-    point(r, b.x + BIRD_WIDTH-2, b.y + BIRD_HEIGHT -1);
-    point(r, b.x + BIRD_WIDTH-1, b.y + BIRD_HEIGHT -2);
+    roundRect(r, b.x, b.y, BIRD_WIDTH, BIRD_WIDTH, 1, 10);
 
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
