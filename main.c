@@ -219,7 +219,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //draw bird
             drawBird(ren, birdy, facing, &jumped, colors, palette);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number))
-                alive = 0;
+               alive = 0;
         }else{
             printRestartButton(ren, colors, palette);
             if(k){
@@ -535,7 +535,7 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
     int visibles = 1 + lvl / ADD_SPIKE_EVERY;//number of actives spikes
 
     if(visibles >= spike_nb){
-        visibles = -1;
+        visibles = spike_nb - 1;
     }
 
     //do we need to update the non-faced side for the next-next hit ?
