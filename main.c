@@ -20,7 +20,7 @@
 #define SPIKE_SPACE_PX 20
 #define GRAVITY 981
 #define BIRD_SPEED 8
-#define ADD_SPIKE_EVERY 10
+#define ADD_SPIKE_EVERY 5
 #define WING_SPEED 7
 #define FONT_SIZE 300
 
@@ -63,7 +63,7 @@ void jump(double*y, double*vy, int*sj);
 int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double a, double b);
 void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled);
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
-void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*font, Color*c, int p);
+void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*score_font, Color*c, int p);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz);
@@ -72,8 +72,8 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
 double min(double a, double b, double c);
 double max(double a, double b, double c);
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
-void setFont(TTF_Font**font, char*font_file, int size);
-void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue);
+void setFont(TTF_Font**score_font, char*font_file, int size);
+void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*score_font, int red, int green, int blue);
 void toChar(char*c, int n);
 void printSettingButton(SDL_Renderer* r, Color*c, int p);
 void printReturnButton(SDL_Renderer* r, Color*c, int p);
@@ -158,15 +158,16 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     SDL_Window *w;//open a window command
     SDL_Renderer *ren;//render creation
-    TTF_Font *font;//font
+    TTF_Font *score_font;//font for score display
+    TTF_Font *setting_font_big;
 
 
     const double spike_size = HEIGHT/(NB_SPIKES+2);//+2 for the down and up spike border
     srand(time(0));
     openSDL(WIDTH, HEIGHT, 0, &w, &ren);
 
-    setFont(&font, "BebasNeue.ttf", FONT_SIZE);
-
+    setFont(&score_font, "BebasNeue.ttf", FONT_SIZE);
+    setFont(&setting_font_big, "BebasNeue.ttf", 100);
 
     SDL_bool program_launched = SDL_TRUE; //SDL_FALSE or SDL_TRUE
     bird birdy;
@@ -195,7 +196,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
     
-    drawBackground(ren, level, font, colors, palette);
+    drawBackground(ren, level, score_font, colors, palette);
     //draw landscape
     drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
     //draw bird
@@ -217,7 +218,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             moveBird(&birdy, &facing, &level, spike_size, spike_size);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
             //draw background
-            drawBackground(ren, level, font, colors, palette);
+            drawBackground(ren, level, score_font, colors, palette);
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
@@ -225,7 +226,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number))
                menu = 0;
         }else if(menu == 0){
-            drawBackground(ren, level, font, colors, palette);
+            drawBackground(ren, level, score_font, colors, palette);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             drawBird(ren, birdy, facing, &jumped, colors, palette);
             printRestartButton(ren, colors, palette);
@@ -243,6 +244,30 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
             //background
             background(ren, colors, palette);
+
+            color(ren, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b, 255);
+
+            rect(ren, 0, 0, WIDTH, spike_size/4, 1);//top
+            rect(ren, 0, HEIGHT-spike_size/4, WIDTH, spike_size/4, 1);//bottom
+            rect(ren, 0, 0, spike_size/4, HEIGHT, 1);//left
+            rect(ren, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
+            /////blurrr
+            int pwr = 50;
+            for(int i = 0 ; i <  pwr ; i ++){
+                color(ren,  ((pwr - i)/(double)pwr) *colors[4*palette + 2].r + (i/(double)pwr) * colors[4*palette + 3].r ,
+                            ((pwr - i)/(double)pwr) *colors[4*palette + 2].g + (i/(double)pwr) * colors[4*palette + 3].g ,
+                            ((pwr - i)/(double)pwr) *colors[4*palette + 2].b + (i/(double)pwr) * colors[4*palette + 3].b , 255);
+                line(ren, spike_size/4 + i, spike_size/4 + i, WIDTH - spike_size/4 - i, spike_size/4 + i);//top
+                line(ren, spike_size/4 + i, HEIGHT - spike_size/4 - i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//bottom
+                line(ren, spike_size/4 + i, spike_size/4 + i, spike_size/4 + i, HEIGHT - spike_size/4 - i);//left
+                line(ren, WIDTH - spike_size/4 - i, spike_size/4 + i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//left
+            }   
+            //////
+
+            //text
+            text(ren, 9.7*WIDTH/40, 50, "Settings", setting_font_big, colors[4*palette + 1].r, colors[4*palette + 1].g, colors[4*palette + 1].b);
+            
+
             printReturnButton(ren, colors, palette);
             if(re){
                 menu = 0;
@@ -311,7 +336,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         SDL_Delay(1000/FRAMES_PER_SECOND);
         SDL_RenderPresent(ren);//refresh the render
     }
-    TTF_CloseFont(font);
+    TTF_CloseFont(setting_font_big);
+    TTF_CloseFont(score_font);
     closeSDL(&w, &ren);
     free(s_l);
     free(s_r);
@@ -602,11 +628,12 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
 
 
     int ind = 0;
-    int visibles = 1 + lvl / ADD_SPIKE_EVERY;//number of actives spikes
+    int maxsp = 1 + lvl / ADD_SPIKE_EVERY;//number of actives spikes
 
-    if(visibles >= spike_nb){
-        visibles = spike_nb - 1;
+    if(maxsp >= spike_nb - 1){
+        maxsp = spike_nb - 2;
     }
+    int visibles = 1 + rand() % maxsp;
 
     //do we need to update the non-faced side for the next-next hit ?
     //only if u_l and u_r are non equal to 0
