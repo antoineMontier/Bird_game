@@ -106,9 +106,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     colors[4].g = 12;
     colors[4].b = 67;
 
-    colors[5].r = 25;
-    colors[5].g = 25;
-    colors[5].b = 25;
+    colors[5].r = 225;
+    colors[5].g = 0;
+    colors[5].b = 35;
 
     colors[6].r = 68;
     colors[6].g = 68;
@@ -158,14 +158,14 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     SDL_Window *w;//open a window command
     SDL_Renderer *ren;//render creation
-    TTF_Font *font;//font  /////////////////try to close font then to do things properly..
+    TTF_Font *font;//font
 
 
     const double spike_size = HEIGHT/(NB_SPIKES+2);//+2 for the down and up spike border
     srand(time(0));
     openSDL(WIDTH, HEIGHT, 0, &w, &ren);
 
-    setFont(&font, "BebasNeue.ttf", FONT_SIZE);/////////////////try to close font then to do things properly..
+    setFont(&font, "BebasNeue.ttf", FONT_SIZE);
 
 
     SDL_bool program_launched = SDL_TRUE; //SDL_FALSE or SDL_TRUE
@@ -311,6 +311,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         SDL_Delay(1000/FRAMES_PER_SECOND);
         SDL_RenderPresent(ren);//refresh the render
     }
+    TTF_CloseFont(font);
     closeSDL(&w, &ren);
     free(s_l);
     free(s_r);
@@ -426,7 +427,7 @@ void printRestartButton(SDL_Renderer* r, Color*c, int p){
     color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
     roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 1, BUTTON_HEIGHT/3);
 
-    color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
+    color(r, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b, 255);
 
     triangle(r  , WIDTH/2 -  BUTTON_WIDTH/2 +  3*BUTTON_WIDTH/10
                 , HEIGHT/2 - BUTTON_HEIGHT/2 + 3*BUTTON_HEIGHT/10
