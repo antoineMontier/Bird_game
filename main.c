@@ -178,7 +178,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //        0for starting bg
     //        1for play
     //       -1for settings
-    
+    int setting_selectionned = 0; // 0 if no one is selectionned
 
  
 
@@ -279,7 +279,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             for(int i = 0 ; i < 8 ; i ++){
                 if(cursor_positions[i] < 0)
                     cursor_positions[i] = 0;
-                else if(cursor_positions[i] > WIDTH - 2*(spike_size/4 + WIDTH/10 + 2))
+                else if(cursor_positions[i] > WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))
                     cursor_positions[i] = WIDTH - 2*(spike_size/4 + WIDTH/10 + 2);
             }
             /////////////////
@@ -290,10 +290,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 roundRect(ren, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
             color(ren, colors[4*palette + 1].r, colors[4*palette + 1].g, colors[4*palette + 1].b, 255);//cursor color
             for(int i = 1 ; i < 8 ; i++){
-                roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 5, 20, 1, 20);//cursor
+                roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
                 toChar(tmp, cursor_positions[i]);
                 text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small,colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
-
             }
 
             printReturnButton(ren, colors, palette);
@@ -352,9 +351,33 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                         s = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3);
                     }
                     if(menu == -1){
+                        //setting_selectionned = 0;
                         re = rollover(evt.button.x, evt.button.y, WIDTH - BUTTON_WIDTH, BUTTON_HEIGHT/2, BUTTON_WIDTH/2, BUTTON_HEIGHT/2);
+                        for(int i = 1 ; i < 8 && setting_selectionned == 0; i++){
+                            if(rollover(evt.button.x, evt.button.y, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20))
+                                setting_selectionned = i;
+                        }
+                        //update the selectionned setting :
+
+
+
+
                     }
                     break;
+
+                case SDL_MOUSEMOTION:
+                    if(menu == -1 && setting_selectionned != 0)
+                        cursor_positions[setting_selectionned] = evt.button.x - (spike_size/4 + WIDTH/10);
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+                    printf("released\n");
+                    if(menu == -1)
+                        setting_selectionned = 0;
+                    break;
+
+                
+
                 default:
                     break; 
 
