@@ -1,4 +1,6 @@
-#include <SDL.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -69,8 +71,10 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
 double min(double a, double b, double c);
 double max(double a, double b, double c);
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
+void setFont(TTF_Font**font, char*font_file, int size);
 
-int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm $(sdl2-config --cflags --libs) && ./main
+
+int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm -lSDL2_ttf $(sdl2-config --cflags --libs) && ./main
 
     Color *colors = malloc(4*PALETTE*sizeof(Color));//store 9*4 colors that behave nicely 4 to 4
 
@@ -150,11 +154,15 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     SDL_Window *w;//open a window command
     SDL_Renderer *ren;//render creation
+    TTF_Font *font;//font  /////////////////try to close font then to do things properly..
 
 
     const double spike_size = HEIGHT/(NB_SPIKES+2);//+2 for the down and up spike border
     srand(time(0));
     openSDL(WIDTH, HEIGHT, 0, &w, &ren);
+
+    setFont(&font, "BebasNeue.ttf", 150);/////////////////try to close font then to do things properly..
+
 
     SDL_bool program_launched = SDL_TRUE; //SDL_FALSE or SDL_TRUE
     bird birdy;
@@ -338,9 +346,13 @@ void openSDL(int x, int y, int mode, SDL_Window**w, SDL_Renderer**r){
     if(SDL_CreateWindowAndRenderer(x, y, mode, w, r) !=0)
         SDL_ExitWithError("window and render creation failed");
 
+    if(TTF_Init() != 0)
+        SDL_ExitWithError("TTF initialisation failed");
+
 }
 
 void closeSDL(SDL_Window**w, SDL_Renderer**r){
+    TTF_Quit();
     SDL_DestroyRenderer(*r);
     SDL_DestroyWindow(*w);
     SDL_Quit();
@@ -909,4 +921,15 @@ void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled,
     }
 
 }
+
+void setFont(TTF_Font**font, char*font_file, int size){
+    *font = TTF_OpenFont(font_file, size);
+    if (*font == NULL) {
+        fprintf(stderr, "error: font not found\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+
 
