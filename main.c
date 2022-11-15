@@ -18,11 +18,11 @@
 #define PALETTE 4
 #define NB_SPIKES 10 
 #define SPIKE_SPACE_PX 20
-#define GRAVITY 981
 #define ADD_SPIKE_EVERY 5
 #define WING_SPEED 7
 #define FONT_SIZE 300
 #define BIRD_MAX_SPEED 30
+#define MAX_GRAVITY 50
 
 typedef struct{
     double x;
@@ -66,7 +66,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*score_font, Color*c, int p);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
-void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed);
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
 void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed);
 double min(double a, double b, double c);
@@ -180,8 +180,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //       -1for settings
     int setting_selectionned = 0; // 0 if no one is selectionned
 
-    int bird_speed = 8;//if it's upper than 30 may cause bugs
-
+    double bird_speed = 8;//if it's upper than 30 may cause bugs
+    double gravity = 9.81;
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -198,6 +198,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     for(int i = 0 ; i < 8 ; i ++)
         cursor_positions[i] = 0;
     cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
+    cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
+
+
 
     startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed);
 
@@ -224,8 +227,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             prev_facing = facing;
 
             bird_speed = cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
 
-            moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed);
+            moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
             //draw background
             drawBackground(ren, level, score_font, colors, palette);
@@ -292,13 +296,21 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             for(int i = 1 ; i < 8 ; i++)
                 roundRect(ren, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
             color(ren, colors[4*palette + 1].r, colors[4*palette + 1].g, colors[4*palette + 1].b, 255);//cursor color
+
             //========================================================bird speed
             text(ren, spike_size/4 + WIDTH/10, spike_size*1.5 + 1*HEIGHT/10, "Speed", setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[1], spike_size*2 + 1*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
             toChar(tmp, cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
             text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 1*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             //=========================================================
-            for(int i = 2 ; i < 8 ; i++){
+
+            //=========================================================gravity
+            text(ren, spike_size/4 + WIDTH/10, spike_size*1.5 + 2*HEIGHT/10, "Gravity", setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+            roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[2], spike_size*2 + 2*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 2*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+            //=========================================================
+            for(int i = 3 ; i < 8 ; i++){
                 roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
                 toChar(tmp, cursor_positions[i]);
                 text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
@@ -787,7 +799,7 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p){
     }
 }
 
-void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed){
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity){
     if(*facing == 1 && ((b->x + BIRD_WIDTH ) > (WIDTH - sp_sz/4))){
         *facing = -1;
         (*lvl)++;
@@ -811,7 +823,7 @@ void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bir
         b->vx = bird_speed;
     else if(*facing == -1)
         b->vx = -bird_speed;
-    b->vy += GRAVITY/1000.0;
+    b->vy += gravity/10.0;
     b->x += b->vx;
     b->y += b->vy;
 }
