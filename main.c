@@ -68,14 +68,14 @@ void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r,
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*alive);
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu);
 double min(double a, double b, double c);
 double max(double a, double b, double c);
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
 void setFont(TTF_Font**font, char*font_file, int size);
 void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue);
 void toChar(char*c, int n);
-
+void printSettingButton(SDL_Renderer* r, Color*c, int p);
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm -lSDL2_ttf $(sdl2-config --cflags --libs) && ./main
 
@@ -171,8 +171,11 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     bird birdy;
     double app_r = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_l = 21;                  //-1 if facing left, 1 if facing right
-    int jumped, alive = 0, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0,spike_number = NB_SPIKES*2;
-
+    int jumped, menu = 0, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, spike_number = NB_SPIKES*2;
+    //        0for starting bg
+    //        1for play
+    //       -1for settings
+    
 
  
 
@@ -187,7 +190,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     int* s_l = malloc(spike_number*sizeof(int));
     int* s_r = malloc(spike_number*sizeof(int));
-    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &alive);
+    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu);
 
 
     
@@ -197,13 +200,13 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //draw bird
     drawBird(ren, birdy, facing, &jumped, colors, palette);
 
-    alive = 0;
+    menu = 0;
 
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     while(program_launched){//principal loop
         SDL_Event evt;
-        if(alive){
+        if(menu == 1){
             //update positions
             if(facing == -1 && prev_facing == 1)
                 update_r = 1;
@@ -219,14 +222,38 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //draw bird
             drawBird(ren, birdy, facing, &jumped, colors, palette);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number))
-               alive = 0;
-        }else{
+               menu = 0;
+        }else if(menu == 0){
             printRestartButton(ren, colors, palette);
+            printSettingButton(ren, colors, palette);
             if(k){
-                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &alive);
+                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu);
                 k = 0;
             }
+            if(s){
+                menu = -1;
+                s = 0;
+            }
+        }else if(menu == -1){
+            //parameters
+
+
+
+
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
         //controls
         while(SDL_PollEvent(&evt)){//reads all the events (mouse moving, key pressed...)        //possible to wait for an event with SDL_WaitEvent
             switch(evt.type){
@@ -253,12 +280,13 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if(alive){
+                    if(menu == 1){
                         birdy.vy = -BIRD_JUMP_POWER;
                         jumped = 90;
                     }
-                    if(!alive)
+                    if(menu == 0)
                         k = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT);
+                        s = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3);
                     break;
                 default:
                     break; 
@@ -383,8 +411,6 @@ double dist(double x1, double y1, double x2, double y2){
 void printRestartButton(SDL_Renderer* r, Color*c, int p){
     color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
     roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 1, BUTTON_HEIGHT/3);
-    color(r, 20, 20, 20, 255);
-    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 0,  BUTTON_HEIGHT/3);
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
 
@@ -396,6 +422,23 @@ void printRestartButton(SDL_Renderer* r, Color*c, int p){
                 , HEIGHT/2
                 , 1);
 
+}
+
+void printSettingButton(SDL_Renderer* r, Color*c, int p){
+    color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
+    roundRect(r, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3, 0, BUTTON_HEIGHT/6);//external rect
+    //cx = WIDTH/2 //cy = HEIGHT/2 + 4*BUTTON_HEIGHT/3
+
+    circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 4*BUTTON_WIDTH/20, 1);
+
+    double angle = 0;
+
+    while(angle <= 2*3.1415){
+        circle(r, WIDTH/2 +  (4*BUTTON_WIDTH/20)*cos(angle),HEIGHT/2 + 4*BUTTON_HEIGHT/3 + (4*BUTTON_WIDTH/20)*sin(angle), BUTTON_WIDTH/20, 1);
+        angle += 3.1415/5;
+    }
+    color(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, 255);
+    circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 3*BUTTON_WIDTH/20, 1);
 }
 
 int rollover(int mx, int my, int x, int y, int w, int h){
@@ -733,7 +776,7 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
 
 }
 
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*alive){
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu){
     //reset bird
     b->x = WIDTH/2 - BIRD_WIDTH/2;
     b->y = HEIGHT/3 - BIRD_HEIGHT/2;
@@ -757,7 +800,7 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
 
 
     *jumped = 0;
-    *alive = 1;
+    *menu = 1;
     if(*lvl == 0)
         return;
 
