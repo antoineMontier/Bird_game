@@ -74,7 +74,7 @@ double max(double a, double b, double c);
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
 void setFont(TTF_Font**font, char*font_file, int size);
 void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue);
-
+void toChar(char*c, int n);
 
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm -lSDL2_ttf $(sdl2-config --cflags --libs) && ./main
@@ -459,9 +459,12 @@ void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, i
 }
 
 void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*font, Color*c, int p){
+    char*score = malloc(5);
+    toChar(score, lvl);
     color(r, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b, 255);
     rect(r, 0, 0, WIDTH, HEIGHT, 1);
-    text(r, WIDTH/2 - 18*FONT_SIZE/30, 150, "180", font, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    text(r, WIDTH/2 - 18*FONT_SIZE/30, 150, score, font, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    free(score);
     /*color(r, 255, 0, 0, 255);
     mark(r, WIDTH/2 - FONT_SIZE/2, 150, 5);
     mark(r, WIDTH/2 + FONT_SIZE/2, 150 + FONT_SIZE, 5);
@@ -960,4 +963,15 @@ void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int g
     SDL_DestroyTexture(texture);
 }
 
+void toChar(char*c, int n){
+    if(n < 0)
+        n = 0;
 
+    c[2] = '0' + (char)(n%10);
+    c[1] = '0' + (char)(n/10 % 10);
+    c[0] = '0' + (char)(n/100);
+
+
+    c[3] = '\0';
+
+}
