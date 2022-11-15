@@ -160,7 +160,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     SDL_Renderer *ren;//render creation
     TTF_Font *score_font;//font for score display
     TTF_Font *setting_font_big;
-
+    TTF_Font *setting_font_small;
 
     const double spike_size = HEIGHT/(NB_SPIKES+2);//+2 for the down and up spike border
     srand(time(0));
@@ -168,6 +168,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     setFont(&score_font, "BebasNeue.ttf", FONT_SIZE);
     setFont(&setting_font_big, "BebasNeue.ttf", 100);
+    setFont(&setting_font_small, "BebasNeue.ttf", 20);
 
     SDL_bool program_launched = SDL_TRUE; //SDL_FALSE or SDL_TRUE
     bird birdy;
@@ -192,6 +193,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     int* s_l = malloc(spike_number*sizeof(int));
     int* s_r = malloc(spike_number*sizeof(int));
+    int* cursor_positions = malloc(8*sizeof(int));
+    char*tmp = malloc(50*sizeof(char));
+    for(int i = 0 ; i < 8 ; i ++)
+        cursor_positions[i] = 0;
+    
+
     startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu);
 
 
@@ -252,7 +259,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             rect(ren, 0, 0, spike_size/4, HEIGHT, 1);//left
             rect(ren, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
             /////blurrr
-            int pwr = 50;
+            int pwr = 40;
             for(int i = 0 ; i <  pwr ; i ++){
                 color(ren,  ((pwr - i)/(double)pwr) *colors[4*palette + 2].r + (i/(double)pwr) * colors[4*palette + 3].r ,
                             ((pwr - i)/(double)pwr) *colors[4*palette + 2].g + (i/(double)pwr) * colors[4*palette + 3].g ,
@@ -266,10 +273,31 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
             //text
             text(ren, 9.7*WIDTH/40, 50, "Settings", setting_font_big, colors[4*palette + 1].r, colors[4*palette + 1].g, colors[4*palette + 1].b);
-            
+
+
+            ///////////////////replace the cursors on the bar before displaying them
+            for(int i = 0 ; i < 8 ; i ++){
+                if(cursor_positions[i] < 0)
+                    cursor_positions[i] = 0;
+                else if(cursor_positions[i] > WIDTH - 2*(spike_size/4 + WIDTH/10 + 2))
+                    cursor_positions[i] = WIDTH - 2*(spike_size/4 + WIDTH/10 + 2);
+            }
+            /////////////////
+
+
+            color(ren, colors[4*palette].r, colors[4*palette].g, colors[4*palette].b, 255);//line color
+            for(int i = 1 ; i < 8 ; i++)
+                roundRect(ren, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
+            color(ren, colors[4*palette + 1].r, colors[4*palette + 1].g, colors[4*palette + 1].b, 255);//cursor color
+            for(int i = 1 ; i < 8 ; i++){
+                roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 5, 20, 1, 20);//cursor
+                toChar(tmp, cursor_positions[i]);
+                text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small,colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
+
+            }
 
             printReturnButton(ren, colors, palette);
-            if(re){
+            if(re){//exit parameters
                 menu = 0;
                 re = 0;
             }
@@ -336,9 +364,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         SDL_Delay(1000/FRAMES_PER_SECOND);
         SDL_RenderPresent(ren);//refresh the render
     }
+    TTF_CloseFont(setting_font_small);
     TTF_CloseFont(setting_font_big);
     TTF_CloseFont(score_font);
     closeSDL(&w, &ren);
+    free(tmp);
+    free(cursor_positions);
     free(s_l);
     free(s_r);
     printf("closed successfully !\n");
