@@ -76,6 +76,7 @@ void setFont(TTF_Font**font, char*font_file, int size);
 void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue);
 void toChar(char*c, int n);
 void printSettingButton(SDL_Renderer* r, Color*c, int p);
+void printReturnButton(SDL_Renderer* r, Color*c, int p);
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm -lSDL2_ttf $(sdl2-config --cflags --libs) && ./main
 
@@ -171,7 +172,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     bird birdy;
     double app_r = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_l = 21;                  //-1 if facing left, 1 if facing right
-    int jumped, menu = 0, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, spike_number = NB_SPIKES*2;
+    int jumped, menu = 0, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, re = 0, spike_number = NB_SPIKES*2;
     //        0for starting bg
     //        1for play
     //       -1for settings
@@ -224,6 +225,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number))
                menu = 0;
         }else if(menu == 0){
+            drawBackground(ren, level, font, colors, palette);
+            drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
+            drawBird(ren, birdy, facing, &jumped, colors, palette);
             printRestartButton(ren, colors, palette);
             printSettingButton(ren, colors, palette);
             if(k){
@@ -237,8 +241,14 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         }else if(menu == -1){
             //parameters
 
-
-
+            //background
+            background(ren, colors, palette);
+            printReturnButton(ren, colors, palette);
+            if(re){
+                menu = 0;
+                re = 0;
+            }
+    
 
 
 
@@ -284,9 +294,13 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                         birdy.vy = -BIRD_JUMP_POWER;
                         jumped = 90;
                     }
-                    if(menu == 0)
+                    if(menu == 0){
                         k = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT);
                         s = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3);
+                    }
+                    if(menu == -1){
+                        re = rollover(evt.button.x, evt.button.y, WIDTH - BUTTON_WIDTH, BUTTON_HEIGHT/2, BUTTON_WIDTH/2, BUTTON_HEIGHT/2);
+                    }
                     break;
                 default:
                     break; 
@@ -439,6 +453,18 @@ void printSettingButton(SDL_Renderer* r, Color*c, int p){
     }
     color(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, 255);
     circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 3*BUTTON_WIDTH/20, 1);
+}
+
+void printReturnButton(SDL_Renderer* r, Color*c, int p){
+    color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
+    roundRect(r, WIDTH - BUTTON_WIDTH, BUTTON_HEIGHT/2, BUTTON_WIDTH/2, BUTTON_HEIGHT/2, 1, BUTTON_HEIGHT/6);
+    color(r, 255, 255, 255, 255);
+
+    roundRect(r, WIDTH - BUTTON_WIDTH + 2*BUTTON_WIDTH/10, BUTTON_HEIGHT/2 + BUTTON_HEIGHT/5, BUTTON_WIDTH/3 - BUTTON_WIDTH/10, 5, 1, BUTTON_HEIGHT/6);//arrow body
+
+    triangle(r,  WIDTH - BUTTON_WIDTH + 5*BUTTON_WIDTH/20, BUTTON_HEIGHT/2 + 2*BUTTON_WIDTH/20//top
+                ,WIDTH - BUTTON_WIDTH + 5*BUTTON_WIDTH/20, BUTTON_HEIGHT - 2*BUTTON_HEIGHT/20//down
+                ,WIDTH - BUTTON_WIDTH + 2*BUTTON_WIDTH/20, 3*BUTTON_HEIGHT/4, 1);//middle
 }
 
 int rollover(int mx, int my, int x, int y, int w, int h){
@@ -1018,3 +1044,4 @@ void toChar(char*c, int n){
     c[3] = '\0';
 
 }
+
