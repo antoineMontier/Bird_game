@@ -22,6 +22,7 @@
 #define BIRD_SPEED 8
 #define ADD_SPIKE_EVERY 10
 #define WING_SPEED 7
+#define FONT_SIZE 300
 
 typedef struct{
     double x;
@@ -62,7 +63,7 @@ void jump(double*y, double*vy, int*sj);
 int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double a, double b);
 void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled);
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
-void drawBackground(SDL_Renderer* r, Color*c, int p);
+void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*font, Color*c, int p);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz);
@@ -72,6 +73,8 @@ double min(double a, double b, double c);
 double max(double a, double b, double c);
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
 void setFont(TTF_Font**font, char*font_file, int size);
+void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue);
+
 
 
 int main(int argc, char *args[]){//compile and execute with     gcc main.c -o main -lm -lSDL2_ttf $(sdl2-config --cflags --libs) && ./main
@@ -161,7 +164,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     srand(time(0));
     openSDL(WIDTH, HEIGHT, 0, &w, &ren);
 
-    setFont(&font, "BebasNeue.ttf", 150);/////////////////try to close font then to do things properly..
+    setFont(&font, "BebasNeue.ttf", FONT_SIZE);/////////////////try to close font then to do things properly..
 
 
     SDL_bool program_launched = SDL_TRUE; //SDL_FALSE or SDL_TRUE
@@ -188,7 +191,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
     
-    drawBackground(ren, colors, palette);
+    drawBackground(ren, level, font, colors, palette);
     //draw landscape
     drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
     //draw bird
@@ -210,7 +213,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             moveBird(&birdy, &facing, &level, spike_size, spike_size);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
             //draw background
-            drawBackground(ren, colors, palette);
+            drawBackground(ren, level, font, colors, palette);
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
@@ -455,9 +458,15 @@ void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, i
     }
 }
 
-void drawBackground(SDL_Renderer* r, Color*c, int p){
+void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*font, Color*c, int p){
     color(r, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b, 255);
     rect(r, 0, 0, WIDTH, HEIGHT, 1);
+    text(r, WIDTH/2 - 18*FONT_SIZE/30, 150, "180", font, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    /*color(r, 255, 0, 0, 255);
+    mark(r, WIDTH/2 - FONT_SIZE/2, 150, 5);
+    mark(r, WIDTH/2 + FONT_SIZE/2, 150 + FONT_SIZE, 5);
+    mark(r, WIDTH/2, 200, 2);*/
+
 }
 
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p){
@@ -930,6 +939,25 @@ void setFont(TTF_Font**font, char*font_file, int size){
     }
 }
 
+void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue){
+    int text_width;
+    int text_height;
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+    SDL_Color textColor = {red, green, blue, 0};
 
+    surface = TTF_RenderText_Blended(font, text, textColor);
+    texture = SDL_CreateTextureFromSurface(r, surface);
+    text_width = surface->w;
+    text_height = surface->h;
+    SDL_FreeSurface(surface);
+    SDL_Rect rectangle;
+    rectangle.x = x;
+    rectangle.y = y;
+    rectangle.w = text_width;
+    rectangle.h = text_height;
+    SDL_RenderCopy(r, texture, NULL, &rectangle);
+    SDL_DestroyTexture(texture);
+}
 
 
