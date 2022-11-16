@@ -74,7 +74,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
     //up and down :
     color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
     rect(r, 0, 0, WIDTH, size/4, 1);
-    rect(r, 0, HEIGHT-size/4, WIDTH, size/4, 1);
+    rect(r, 0, HEIGHT-size/4, WIDTH, size/4 + 1, 1);
 
     double x = spike_size;
     while(x <= WIDTH - spike_size/2){
@@ -257,20 +257,26 @@ void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bir
 
 int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb, double bird_size){
     const double spike_size = WIDTH/(2*NB_SPIKES/3);
-    //3 controls points : up edge ; low edge ; middle
-    double x1, x2, x3, y1, y2, y3;
+    //5 controls points : 0 ; 1/4 ; 2/4 ; 3/4 ; 4/4
+    double x1, x2, x3, x4, x5, y1, y2, y3, y4, y5;
     if(facing == 1){//right
         x1 = b.x + bird_size;
         x2 = b.x + bird_size;
         x3 = b.x + bird_size;
+        x4 = b.x + bird_size;
+        x5 = b.x + bird_size;
     }else if(facing == -1){
         x1 = b.x;
         x2 = b.x;
         x3 = b.x;
+        x4 = b.x;
+        x5 = b.x;
     }
     y1 = b.y;
-    y2 = b.y + bird_size/2;
-    y3 = b.y + bird_size;
+    y2 = b.y + 1*bird_size/4;
+    y3 = b.y + 2*bird_size/4;
+    y4 = b.y + 3*bird_size/4;
+    y5 = b.y + 4*bird_size/4;
 
 
     double y = 1.5*spike_size;
@@ -279,18 +285,26 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
         if(facing == -1 && s_l[i] == 1){
             if(dist(size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(size/4, y, x1, y1) <= 9*spike_size/30)
+            if(dist(size/4, y, x2, y2) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(size/4, y, x1, y1) <= 9*spike_size/30)
+            if(dist(size/4, y, x3, y3) <= 9*spike_size/30)
+                return 1;//true
+            if(dist(size/4, y, x4, y4) <= 9*spike_size/30)
+                return 1;//true
+            if(dist(size/4, y, x5, y5) <= 9*spike_size/30)
                 return 1;//true
         }
         //right check
         if(facing == 1 && s_r[i] == 1){
             if(dist(WIDTH - size/4, y, x1, y1) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(WIDTH - size/4, y, x1, y1) <= 9*spike_size/30)
+            if(dist(WIDTH - size/4, y, x2, y2) <= 9*spike_size/30)
                 return 1;//true
-            if(dist(WIDTH - size/4, y, x1, y1) <= 9*spike_size/30)
+            if(dist(WIDTH - size/4, y, x3, y3) <= 9*spike_size/30)
+                return 1;//true
+            if(dist(WIDTH - size/4, y, x4, y4) <= 9*spike_size/30)
+                return 1;//true
+            if(dist(WIDTH - size/4, y, x5, y5) <= 9*spike_size/30)
                 return 1;//true
         }
         y += spike_size;
