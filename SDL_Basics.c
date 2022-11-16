@@ -116,23 +116,19 @@ int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double 
 double min(double a, double b, double c){
     if(a < b && a < c)
         return a;
-    if(b < a && b < c)
+    else if(b < a && b < c)
         return b;
-    if(c < a && c < b)
+    else if(c < a && c < b)
         return c;
-    else
-        return 0;
 }
 
 double max(double a, double b, double c){
     if(a > b && a > c)
         return a;
-    if(b > a && b > c)
+    else if(b > a && b > c)
         return b;
-    if(c > a && c > b)
+    else if(c >a && c >b)
         return c;
-    else
-        return 0;
 }
 
 void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled){
@@ -140,11 +136,12 @@ void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, i
     line(r, x2, y2, x3, y3);
     line(r, x3, y3, x1, y1);
     if(filled){
-
         int s_x = min(x1, x2, x3);
         int s_y = min(y1, y2, y3);
         int f_x = max(x1, x2, x3);
         int f_y = max(y1, y2, y3);
+
+
 
         for(int a = s_x ; a <= f_x ; a++){
             for(int b = s_y ; b <= f_y ; b++){
