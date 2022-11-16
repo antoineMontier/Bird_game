@@ -8,8 +8,7 @@
 
 #define WIDTH 540
 #define HEIGHT 940
-#define BIRD_WIDTH 40
-#define BIRD_HEIGHT 40
+#define BIRD_MAX_SIZE 200
 #define MAX_JUMP 200
 #define ACCELERATION 180
 #define FRAMES_PER_SECOND 36
@@ -65,10 +64,10 @@ void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, i
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
 void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*score_font, Color*c, int p);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
-void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p);
-void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity);
-int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb);
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed);
+void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p, double bird_size);
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size);
+int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb, double bird_size);
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed, double bird_size);
 double min(double a, double b, double c);
 double max(double a, double b, double c);
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
@@ -183,6 +182,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     double bird_speed = 8;//if it's upper than 30 may cause bugs
     double gravity = 9.81;
     double bird_jump_pwr = 20;
+    double bird_size = 40;
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -201,9 +201,10 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
     cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
     cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
+    cursor_positions[4] = bird_size*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
 
 
-    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed);
+    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
 
 
     
@@ -211,7 +212,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //draw landscape
     drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
     //draw bird
-    drawBird(ren, birdy, facing, &jumped, colors, palette);
+    drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
 
     menu = 0;
 
@@ -230,25 +231,28 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             bird_speed = cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             bird_jump_pwr = cursor_positions[3]*(MAX_JUMP+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            printf("%lf\n", bird_size);
 
-            moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity);
+
+            moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
             //draw background
             drawBackground(ren, level, score_font, colors, palette);
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
-            drawBird(ren, birdy, facing, &jumped, colors, palette);
-            if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number))
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
+            if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
                menu = 0;
         }else if(menu == 0){
             drawBackground(ren, level, score_font, colors, palette);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
-            drawBird(ren, birdy, facing, &jumped, colors, palette);
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
             printRestartButton(ren, colors, palette);
             printSettingButton(ren, colors, palette);
             if(k){
-                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed);
+                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
                 k = 0;
             }
             if(s){
@@ -313,22 +317,27 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 2*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             //=========================================================
 
-            //=========================================================jump ppower
+            //=========================================================jump power
             text(ren, spike_size/4 + WIDTH/10, spike_size*1.5 + 3*HEIGHT/10, "Jump power", setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[3], spike_size*2 + 3*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
             toChar(tmp, cursor_positions[3]*(MAX_JUMP+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
             text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 3*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
-
-
+            //=========================================================
+            
+            //=========================================================bird size
+            text(ren, spike_size/4 + WIDTH/10, spike_size*1.5 + 4*HEIGHT/10, "Size", setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+            roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[4], spike_size*2 + 4*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[4]*(BIRD_MAX_SIZE+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 4*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             //=========================================================
 
 
-
-            for(int i = 4 ; i < 8 ; i++){
+            for(int i = 5 ; i < 8 ; i++){
                 roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
                 toChar(tmp, cursor_positions[i]);
                 text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
             }
+            bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
 
             
 
@@ -758,63 +767,63 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
     }
 }
 
-void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p){
+void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, double bird_size){
     color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
-    roundRect(r, b.x, b.y, BIRD_WIDTH, BIRD_WIDTH, 1, 10);
+    roundRect(r, b.x, b.y, bird_size, bird_size, 1, 10);
 
 
     color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
     //========================================================================================
     if(facing == 1){//right
-        triangle(r, b.x + 4.8*BIRD_WIDTH/5, 
-                    b.y + 1.2*BIRD_WIDTH/5,//top
-                    b.x + 4.8*BIRD_WIDTH/5,
-                    b.y + 3.2*BIRD_WIDTH/5,//down
-                    b.x + 6*BIRD_WIDTH/5,
-                    b.y + 2.2*BIRD_WIDTH/5, 1);//middle
+        triangle(r, b.x + 4.8*bird_size/5, 
+                    b.y + 1.2*bird_size/5,//top
+                    b.x + 4.8*bird_size/5,
+                    b.y + 3.2*bird_size/5,//down
+                    b.x + 6*bird_size/5,
+                    b.y + 2.2*bird_size/5, 1);//middle
         //eye
-        circle(r, b.x + 3*BIRD_WIDTH/5, b.y + 1*BIRD_HEIGHT/4, 5, 1);
+        circle(r, b.x + 3*bird_size/5, b.y + 1*bird_size/4, bird_size/8, 1);
         color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
         //wing if not jumped
         if(*j <= 0){
-            triangle(r, b.x + BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//top
-                        b.x + 5*BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//left
-                        b.x + BIRD_WIDTH/10, b.y + 9*BIRD_HEIGHT/10, 1);//down
+            triangle(r, b.x + bird_size/10, b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, b.y + bird_size/2,//left
+                        b.x + bird_size/10, b.y + 9*bird_size/10, 1);//down
         }else{//wing if jumped
-            triangle(r, b.x + BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//top
-                        b.x + 5*BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//left
-                        b.x + BIRD_WIDTH/10, b.y + (9 - (*j)/10 )*BIRD_HEIGHT/10, 1);//down
+            triangle(r, b.x + bird_size/10, b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, b.y + bird_size/2,//left
+                        b.x + bird_size/10, b.y + (9 - (*j)/10 )*bird_size/10, 1);//down
             (*j)-= WING_SPEED;
         }
             
     //========================================================================================
     }else if(facing == -1){//left
-        triangle(r, b.x +0.2*BIRD_WIDTH/5, 
-                    b.y + 1.2*BIRD_WIDTH/5,//top
-                    b.x +0.2*BIRD_WIDTH/5,
-                    b.y + 3.2*BIRD_WIDTH/5,//down
-                    b.x -1*BIRD_WIDTH/5,
-                    b.y + 2.2*BIRD_WIDTH/5, 1);//middle
+        triangle(r, b.x +0.2*bird_size/5, 
+                    b.y + 1.2*bird_size/5,//top
+                    b.x +0.2*bird_size/5,
+                    b.y + 3.2*bird_size/5,//down
+                    b.x -1*bird_size/5,
+                    b.y + 2.2*bird_size/5, 1);//middle
         //eye
-        circle(r, b.x + 2*BIRD_WIDTH/5, b.y + 1*BIRD_HEIGHT/4, 5, 1);
+        circle(r, b.x + 2*bird_size/5, b.y + 1*bird_size/4, bird_size/8, 1);
         color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
         //wing if not jumped
         if(*j <= 0){
-            triangle(r, b.x + 9*BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//top
-                        b.x + 5*BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//right
-                        b.x + 9*BIRD_WIDTH/10, b.y + 9*BIRD_HEIGHT/10, 1);//down
+            triangle(r, b.x + 9*bird_size/10, b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, b.y + bird_size/2,//right
+                        b.x + 9*bird_size/10, b.y + 9*bird_size/10, 1);//down
         }else{//wing if jumped
-            triangle(r, b.x + 9*BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//top
-                        b.x + 5*BIRD_WIDTH/10, b.y + BIRD_HEIGHT/2,//left
-                        b.x + 9*BIRD_WIDTH/10, b.y + (9 - (*j)/10 )*BIRD_HEIGHT/10, 1);//down
+            triangle(r, b.x + 9*bird_size/10, b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, b.y + bird_size/2,//left
+                        b.x + 9*bird_size/10, b.y + (9 - (*j)/10 )*bird_size/10, 1);//down
             (*j)-= WING_SPEED;
         }
             
     }
 }
 
-void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity){
-    if(*facing == 1 && ((b->x + BIRD_WIDTH ) > (WIDTH - sp_sz/4))){
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size){
+    if(*facing == 1 && ((b->x + bird_size ) > (WIDTH - sp_sz/4))){
         *facing = -1;
         (*lvl)++;
     }else if(*facing == -1 && ((b->x ) < sp_sz/4)){
@@ -824,10 +833,10 @@ void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bir
 
     if(b->y <= size/4)
         b->vy = abs(b->vy)*0.9;//little loss of speed when bouncing
-    else if(b->y + BIRD_HEIGHT > HEIGHT - size/4)
+    else if(b->y + bird_size > HEIGHT - size/4)
         b->vy = -abs(b->vy)*0.9;//little loss of speed when bouncing
 
-    if(b->y + BIRD_HEIGHT > HEIGHT)
+    if(b->y + bird_size > HEIGHT)
         b->vy = -bird_speed;
     else if(b->y < 0)
         b->vy = bird_speed;
@@ -842,22 +851,22 @@ void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bir
     b->y += b->vy;
 }
 
-int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb){
+int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb, double bird_size){
     const double spike_size = WIDTH/(2*NB_SPIKES/3);
     //3 controls points : up edge ; low edge ; middle
     double x1, x2, x3, y1, y2, y3;
     if(facing == 1){//right
-        x1 = b.x + BIRD_WIDTH;
-        x2 = b.x + BIRD_WIDTH;
-        x3 = b.x + BIRD_WIDTH;
+        x1 = b.x + bird_size;
+        x2 = b.x + bird_size;
+        x3 = b.x + bird_size;
     }else if(facing == -1){
         x1 = b.x;
         x2 = b.x;
         x3 = b.x;
     }
     y1 = b.y;
-    y2 = b.y + BIRD_HEIGHT/2;
-    y3 = b.y + BIRD_HEIGHT;
+    y2 = b.y + bird_size/2;
+    y3 = b.y + bird_size;
 
 
     double y = 1.5*spike_size;
@@ -891,8 +900,8 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
         if(b.y < spike_size){//make the calculations easy
             y1 = y2 = y3 = b.y;
             x1 = b.x;
-            x2 = b.x + BIRD_WIDTH/2;
-            x3 = b.x + BIRD_WIDTH;
+            x2 = b.x + bird_size/2;
+            x3 = b.x + bird_size;
             if(dist(x, size/3, x1, y1) <= 9*spike_size/30)
                 return 1;//true
             if(dist(x, size/3, x2, y2) <= 9*spike_size/30)
@@ -902,11 +911,11 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
         }
         
         //down
-        if(b.y + BIRD_HEIGHT >= HEIGHT - spike_size){
-            y1 = y2 = y3 = b.y + BIRD_HEIGHT;
+        if(b.y + bird_size >= HEIGHT - spike_size){
+            y1 = y2 = y3 = b.y + bird_size;
             x1 = b.x;
-            x2 = b.x + BIRD_WIDTH/2;
-            x3 = b.x + BIRD_WIDTH;
+            x2 = b.x + bird_size/2;
+            x3 = b.x + bird_size;
             if(dist(x, HEIGHT - size/3, x1, y1) <= 9*spike_size/30)
                 return 1;//true
             if(dist(x, HEIGHT - size/3, x2, y2) <= 9*spike_size/30)
@@ -921,10 +930,10 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
 
 }
 
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed){
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed, double bird_size){
     //reset bird
-    b->x = WIDTH/2 - BIRD_WIDTH/2;
-    b->y = HEIGHT/3 - BIRD_HEIGHT/2;
+    b->x = WIDTH/2 - bird_size/2;
+    b->y = HEIGHT/3 - bird_size/2;
     b->vx = bird_speed;
     b->vy = 0;
 
