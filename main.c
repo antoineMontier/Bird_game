@@ -51,7 +51,7 @@ void rect(SDL_Renderer* r, int x, int y, int height, int width, int filled);
 void circle(SDL_Renderer * r, int centreX, int centreY, int radius, int filled);
 void openSDL(int x, int y, int mode, SDL_Window**w, SDL_Renderer**r);
 void closeSDL(SDL_Window**w, SDL_Renderer**r);
-void background(SDL_Renderer* r, Color*c, int p);
+void background(SDL_Renderer* r, int red, int green, int blue, int w, int h, int p);
 void drawLandscape(SDL_Renderer* r, Color*c, int p);
 double dist(double x1, double y1, double x2, double y2);
 void printRestartButton(SDL_Renderer* r, Color*c, int p);
@@ -263,7 +263,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //parameters
 
             //background
-            background(ren, colors, palette);
+            background(ren, colors[4*palette+3].r, colors[4*palette+3].g, colors[4*palette+3].b, WIDTH, HEIGHT, palette);
 
             color(ren, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b, 255);
 
@@ -537,9 +537,9 @@ void closeSDL(SDL_Window**w, SDL_Renderer**r){
     SDL_Quit();
 }
 
-void background(SDL_Renderer* r, Color*c, int p){
-    color(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, 255);
-    rect(r, 0, 0, WIDTH, HEIGHT, 1);
+void background(SDL_Renderer* r, int red, int green, int blue, int w, int h, int p){
+    color(r, red, green, blue, 255);
+    rect(r, 0, 0, w, h, 1);
 }
 
 void drawLandscape(SDL_Renderer* r, Color*c, int p){
