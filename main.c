@@ -10,7 +10,7 @@
 #define HEIGHT 940
 #define BIRD_WIDTH 40
 #define BIRD_HEIGHT 40
-#define BIRD_JUMP_POWER 20
+#define MAX_JUMP 200
 #define ACCELERATION 180
 #define FRAMES_PER_SECOND 36
 #define BUTTON_WIDTH 70
@@ -182,6 +182,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     double bird_speed = 8;//if it's upper than 30 may cause bugs
     double gravity = 9.81;
+    double bird_jump_pwr = 20;
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -199,7 +200,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         cursor_positions[i] = 0;
     cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
     cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
-
+    cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
 
 
     startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed);
@@ -228,6 +229,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
             bird_speed = cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            bird_jump_pwr = cursor_positions[3]*(MAX_JUMP+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
 
             moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
@@ -310,7 +312,19 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             toChar(tmp, cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
             text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 2*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             //=========================================================
-            for(int i = 3 ; i < 8 ; i++){
+
+            //=========================================================jump ppower
+            text(ren, spike_size/4 + WIDTH/10, spike_size*1.5 + 3*HEIGHT/10, "Jump power", setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+            roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[3], spike_size*2 + 3*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[3]*(MAX_JUMP+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 3*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+
+
+            //=========================================================
+
+
+
+            for(int i = 4 ; i < 8 ; i++){
                 roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
                 toChar(tmp, cursor_positions[i]);
                 text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
@@ -356,7 +370,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                             break;
 
                         case SDLK_SPACE:
-                            birdy.vy = -BIRD_JUMP_POWER;
+                            birdy.vy = -bird_jump_pwr;
                             jumped = 90;
                             break;
 
@@ -367,7 +381,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
                 case SDL_MOUSEBUTTONDOWN:
                     if(menu == 1){
-                        birdy.vy = -BIRD_JUMP_POWER;
+                        birdy.vy = -bird_jump_pwr;
                         jumped = 90;
                     }
                     if(menu == 0){
