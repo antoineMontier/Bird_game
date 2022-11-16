@@ -10,18 +10,16 @@
 #define HEIGHT 940
 #define BIRD_MAX_SIZE 200
 #define MAX_JUMP 200
-#define ACCELERATION 180
 #define FRAMES_PER_SECOND 36
 #define BUTTON_WIDTH 70
 #define BUTTON_HEIGHT 70
 #define PALETTE 4
 #define NB_SPIKES 10 
 #define SPIKE_SPACE_PX 20
-#define ADD_SPIKE_EVERY 5
 #define WING_SPEED 7
-#define FONT_SIZE 300
 #define BIRD_MAX_SPEED 30
 #define MAX_GRAVITY 50
+#define MIN_SPIKE_DIFFICULTY 20
 
 typedef struct{
     double x;
@@ -63,7 +61,7 @@ int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double 
 void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled);
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
 void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*score_font, Color*c, int p);
-void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r);
+void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r, int spike_increase);
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p, double bird_size);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb, double bird_size);
@@ -165,7 +163,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     srand(time(0));
     openSDL(WIDTH, HEIGHT, 0, &w, &ren);
 
-    setFont(&score_font, "BebasNeue.ttf", FONT_SIZE);
+    setFont(&score_font, "BebasNeue.ttf", 300);
     setFont(&setting_font_big, "BebasNeue.ttf", 100);
     setFont(&setting_font_small, "BebasNeue.ttf", 30);
 
@@ -183,6 +181,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     double gravity = 9.81;
     double bird_jump_pwr = 20;
     double bird_size = 40;
+    int spike_increase = 7;
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -202,6 +201,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
     cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
     cursor_positions[4] = bird_size*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
+    cursor_positions[5] = spike_increase*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the bird's size at 40
 
 
     startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
@@ -232,11 +232,11 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             bird_jump_pwr = cursor_positions[3]*(MAX_JUMP+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
-            printf("%lf\n", bird_size);
+            spike_increase = cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
 
 
             moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size);
-            spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r);
+            spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r, spike_increase);
             //draw background
             drawBackground(ren, level, score_font, colors, palette);
             //draw landscape
@@ -331,8 +331,15 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 4*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             //=========================================================
 
+            //=========================================================spike incrementation
+            text(ren, spike_size/4 + WIDTH/10, spike_size*1.5 + 5*HEIGHT/10, "Spike simplicity", setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+            roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[5], spike_size*2 + 5*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 5*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
+            //=========================================================
 
-            for(int i = 5 ; i < 8 ; i++){
+
+            for(int i = 6 ; i < 8 ; i++){
                 roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
                 toChar(tmp, cursor_positions[i]);
                 text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
@@ -659,7 +666,7 @@ void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*font, Color*c, int p){
     toChar(score, lvl);
     color(r, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b, 255);
     rect(r, 0, 0, WIDTH, HEIGHT, 1);
-    text(r, WIDTH/2 - 18*FONT_SIZE/30, 150, score, font, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    text(r, WIDTH/2 - 18*300/30, 150, score, font, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
     free(score);
     /*color(r, 255, 0, 0, 255);
     mark(r, WIDTH/2 - FONT_SIZE/2, 150, 5);
@@ -703,7 +710,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 
 }
 
-void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int *u_l, int *u_r){
+void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int *u_l, int *u_r, int spike_increase){
     srand(time(0));
 
 
@@ -728,7 +735,9 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
 
 
     int ind = 0;
-    int maxsp = 1 + lvl / ADD_SPIKE_EVERY;//number of actives spikes
+    if(spike_increase <= 0)//anti-exception
+        spike_increase = 1;
+    int maxsp = 1 + lvl / spike_increase;//number of actives spikes
 
     if(maxsp >= spike_nb - 1){
         maxsp = spike_nb - 2;
