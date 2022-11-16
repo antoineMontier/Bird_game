@@ -1,7 +1,8 @@
 # make && ./main
 # source files list
-SRC = main.c
-#SRC = $(wildcard *.c)
+
+SRC = $(wildcard *.c)
+
 
 OBJ = $(addprefix build/,$(SRC:.c=.o))
 DEP = $(addprefix build/,$(SRC:.c=.d))
