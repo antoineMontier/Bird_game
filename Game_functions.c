@@ -44,16 +44,16 @@ void printSettingButton(SDL_Renderer* r, Color*c, int p){
     circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 2.2*BUTTON_WIDTH/20, 1);
 }
 
-void printReturnButton(SDL_Renderer* r, Color*c, int p){
+void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation){
     color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
-    roundRect(r, WIDTH - BUTTON_WIDTH, BUTTON_HEIGHT/2, BUTTON_WIDTH/2, BUTTON_HEIGHT/2, 1, BUTTON_HEIGHT/6);
+    roundRect(r, WIDTH - animation*BUTTON_WIDTH, animation*BUTTON_HEIGHT/2, BUTTON_WIDTH/2, BUTTON_HEIGHT/2, 1, BUTTON_HEIGHT/6);
     color(r, 255, 255, 255, 255);
 
-    roundRect(r, WIDTH - BUTTON_WIDTH + 2*BUTTON_WIDTH/10, BUTTON_HEIGHT/2 + BUTTON_HEIGHT/5, BUTTON_WIDTH/3 - BUTTON_WIDTH/10, 5, 1, BUTTON_HEIGHT/6);//arrow body
+    roundRect(r, WIDTH - animation*BUTTON_WIDTH + 2*BUTTON_WIDTH/10, BUTTON_HEIGHT/2 + BUTTON_HEIGHT/5, BUTTON_WIDTH/3 - BUTTON_WIDTH/10, 5, 1, BUTTON_HEIGHT/6);//arrow body
 
-    triangle(r,  WIDTH - BUTTON_WIDTH + 5*BUTTON_WIDTH/20, BUTTON_HEIGHT/2 + 2*BUTTON_WIDTH/20//top
-                ,WIDTH - BUTTON_WIDTH + 5*BUTTON_WIDTH/20, BUTTON_HEIGHT - 2*BUTTON_HEIGHT/20//down
-                ,WIDTH - BUTTON_WIDTH + 2*BUTTON_WIDTH/20, 3*BUTTON_HEIGHT/4, 1);//middle
+    triangle(r,  WIDTH - animation*BUTTON_WIDTH + 5*BUTTON_WIDTH/20, BUTTON_HEIGHT/2 + 2*BUTTON_WIDTH/20//top
+                ,WIDTH - animation*BUTTON_WIDTH + 5*BUTTON_WIDTH/20, BUTTON_HEIGHT - 2*BUTTON_HEIGHT/20//down
+                ,WIDTH - animation*BUTTON_WIDTH + 2*BUTTON_WIDTH/20, 3*BUTTON_HEIGHT/4, 1);//middle
 }
 
 void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*font, Color*c, int p){
@@ -349,7 +349,7 @@ int birdTouchSpike(bird b, int facing, int size, int *s_l, int*s_r, int spike_nb
 
 }
 
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed, double bird_size){
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, double*menu, double bird_speed, double bird_size){
     //reset bird
     b->x = WIDTH/2 - bird_size/2;
     b->y = HEIGHT/3 - bird_size/2;
@@ -388,10 +388,10 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
 
 }
 
-void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p){
+void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p, double animation){
     color(r, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b, 255);
-    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, 10);
-    text(r, WIDTH/2 - 8*BUTTON_WIDTH/20, HEIGHT - 0.98*BUTTON_HEIGHT, "Reset", f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
+    roundRect(r, WIDTH - animation*(WIDTH/2 + BUTTON_WIDTH/2), HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, 10);
+    text(r, WIDTH/2 - 8*BUTTON_WIDTH/20, HEIGHT - animation*0.98*BUTTON_HEIGHT, "Reset", f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
 }
 
 void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int spike_size){
@@ -409,99 +409,103 @@ void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*
     cursor_positions[5] = (*si)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the spike difficulty at 40
 }
 
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize){
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu){
     background(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, WIDTH, HEIGHT);
+    double text_animation = (*menu) + 2; //from 0 to 1
+    color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
+    rect(r, 0, 0, WIDTH, spike_size/4, 1);//top
+    rect(r, 0, HEIGHT-spike_size/4, WIDTH, spike_size/4 + 1, 1);//bottom
+    rect(r, 0, 0, spike_size/4, HEIGHT, 1);//left
+    rect(r, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
+    /////blurrr
+    int pwr = text_animation*40;
+    for(int i = 0 ; i <  pwr ; i ++){
+        color(r,  ((pwr - i)/(double)pwr) *c[4*p + 2].r + (i/(double)pwr) * c[4*p + 3].r ,
+        ((pwr - i)/(double)pwr) *c[4*p + 2].g + (i/(double)pwr) * c[4*p + 3].g ,
+        ((pwr - i)/(double)pwr) *c[4*p + 2].b + (i/(double)pwr) * c[4*p + 3].b , 255);
+        line(r, spike_size/4 + i, spike_size/4 + i, WIDTH - spike_size/4 - i, spike_size/4 + i);//top
+        line(r, spike_size/4 + i, HEIGHT - spike_size/4 - i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//bottom
+        line(r, spike_size/4 + i, spike_size/4 + i, spike_size/4 + i, HEIGHT - spike_size/4 - i);//left
+        line(r, WIDTH - spike_size/4 - i, spike_size/4 + i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//left
+    }   
+    //////en blurrr
 
-            color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
-
-            rect(r, 0, 0, WIDTH, spike_size/4, 1);//top
-            rect(r, 0, HEIGHT-spike_size/4, WIDTH, spike_size/4 + 1, 1);//bottom
-            rect(r, 0, 0, spike_size/4, HEIGHT, 1);//left
-            rect(r, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
-            /////blurrr
-            int pwr = 40;
-            for(int i = 0 ; i <  pwr ; i ++){
-                color(r,  ((pwr - i)/(double)pwr) *c[4*p + 2].r + (i/(double)pwr) * c[4*p + 3].r ,
-                            ((pwr - i)/(double)pwr) *c[4*p + 2].g + (i/(double)pwr) * c[4*p + 3].g ,
-                            ((pwr - i)/(double)pwr) *c[4*p + 2].b + (i/(double)pwr) * c[4*p + 3].b , 255);
-                line(r, spike_size/4 + i, spike_size/4 + i, WIDTH - spike_size/4 - i, spike_size/4 + i);//top
-                line(r, spike_size/4 + i, HEIGHT - spike_size/4 - i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//bottom
-                line(r, spike_size/4 + i, spike_size/4 + i, spike_size/4 + i, HEIGHT - spike_size/4 - i);//left
-                line(r, WIDTH - spike_size/4 - i, spike_size/4 + i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//left
-            }   
-            //////
-
-            //text
-            text(r, 9.7*WIDTH/40, 50, "Settings", big, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b);
-
-
-            ///////////////////replace the cursors on the bar before displaying them
-            for(int i = 0 ; i < 8 ; i ++){
-                if(cursor_positions[i] < 0)
-                    cursor_positions[i] = 0;
-                else if(cursor_positions[i] > WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))
-                    cursor_positions[i] = WIDTH - 2*(spike_size/4 + WIDTH/10 + 2);
-            }
-            /////////////////
-
-
-            color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);//line color
-            for(int i = 1 ; i < 8 ; i++)
-            roundRect(r, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
-            color(r, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b, 255);//cursor color
-
-            //========================================================bird speed
-            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 1*HEIGHT/10, "Speed", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[1], spike_size*2 + 1*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 1*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            //=========================================================
-
-            //=========================================================gravity
-            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 2*HEIGHT/10, "Gravity", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[2], spike_size*2 + 2*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 2*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            //=========================================================
-
-            //=========================================================jump power
-            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 3*HEIGHT/10, "Jump power", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[3], spike_size*2 + 3*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[3]*(MAX_JUMP+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 3*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            //=========================================================
-            
-            //=========================================================bird size
-            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 4*HEIGHT/10, "Size", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[4], spike_size*2 + 4*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[4]*(BIRD_MAX_SIZE+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 4*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            //=========================================================
-
-            //=========================================================spike incrementation
-            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 5*HEIGHT/10, "Spike simplicity", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[5], spike_size*2 + 5*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 5*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
-            //=========================================================
-
-            //=========================================================6th cursor
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[6], spike_size*2 + 6*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[6]);
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 6*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);//display a number in front of the setting bar
-            //=========================================================
-
-            //=========================================================7th cursor
-            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[7], spike_size*2 + 7*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-            toChar(tmp, cursor_positions[7]);
-            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 7*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);//display a number in front of the setting bar
-            //=========================================================
-
-            *birdsize = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+    //text
+    text(r, 9.7*WIDTH/40, text_animation*50, "Settings", big, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b);
+    ///////////////////replace the cursors on the bar before displaying them
+    for(int i = 0 ; i < 8 ; i ++){
+        if(cursor_positions[i] < 0)
+            cursor_positions[i] = 0;
+        else if(cursor_positions[i] > WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))
+            cursor_positions[i] = WIDTH - 2*(spike_size/4 + WIDTH/10 + 2);
+    }
+    /////////////////end replace
+    color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);//line color
+    for(int i = 1 ; i < 8 ; i++)
+        roundRect(r, spike_size/4 + WIDTH/10, text_animation*spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
+    color(r, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b, 255);//cursor color
 
 
-            printResetSettingsButton(r, small, c, p);
-            printReturnButton(r, c, p);
+    //========================================================bird speed
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 1*HEIGHT/10, "Speed", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[1], (2-text_animation)*spike_size*2 + 1*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+    text(r, WIDTH - text_animation*(1.8*WIDTH/10), 4.3*spike_size/2 + 1*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    //=========================================================
+
+    //=========================================================gravity
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 2*HEIGHT/10, "Gravity", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[2], (2-text_animation)*spike_size*2 + 2*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+    text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 2*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    //=========================================================
+
+    //=========================================================jump power
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 3*HEIGHT/10, "Jump power", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[3], (2-text_animation)*spike_size*2 + 3*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[3]*(MAX_JUMP+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+    text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 3*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    //=========================================================
+        
+    //=========================================================bird size
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 4*HEIGHT/10, "Size", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[4], (2-text_animation)*spike_size*2 + 4*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[4]*(BIRD_MAX_SIZE+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+    text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 4*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    //=========================================================
+
+    //=========================================================spike incrementation
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 5*HEIGHT/10, "Spike simplicity", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[5], (2-text_animation)*spike_size*2 + 5*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+    text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 5*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+        //=========================================================
+
+    //=========================================================6th cursor
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[6], (2-text_animation)*spike_size*2 + 6*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[6]);
+    text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 6*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);//display a number in front of the setting bar
+    //=========================================================
+
+    //=========================================================7th cursor
+    roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[7], (2-text_animation)*spike_size*2 + 7*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+    toChar(tmp, cursor_positions[7]);
+    text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 7*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);//display a number in front of the setting bar
+    //=========================================================
+
+
+
+
+    if(*menu < -1.0)//update animation
+        (*menu)+=0.15;
+    if(*menu > -1.0)
+        (*menu) = -1.0;
+
+    *birdsize = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+    printResetSettingsButton(r, small, c, p, text_animation);
+    printReturnButton(r, c, p, text_animation);
+
+
 }
 
 
