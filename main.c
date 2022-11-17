@@ -104,11 +104,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //       -1for settings
     int setting_selectionned = 0; // 0 if no one is selectionned
 
-    double bird_speed = 8;//if it's upper than 30 may cause bugs
-    double gravity = 9.81;
-    double bird_jump_pwr = 20;
-    double bird_size = 40;
-    int spike_increase = 7;
+    double bird_speed = ORIGINAL_BIRD_SPEED;//if it's upper than 30 may cause bugs
+    double gravity = ORIGINAL_GRAVITY;
+    double bird_jump_pwr = ORIGINAL_JUMP_PWR;
+    double bird_size = ORIGINAL_BIRD_SIZE;
+    int spike_increase = ORIGINAL_SPIKE_INCREASE;
+
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -126,7 +127,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     int* cursor_positions = malloc(8*sizeof(int));
     char*tmp = malloc(50*sizeof(char));
     for(int i = 0 ; i < 8 ; i ++)
-        cursor_positions[i] = 0;
+    cursor_positions[i] = 0;
     cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
     cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
     cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
@@ -150,6 +151,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     while(program_launched){//principal loop
         SDL_Event evt;
+
+        
+
+
+
+
         if(menu == 1){
             //update positions
             if(facing == -1 && prev_facing == 1)
@@ -176,6 +183,10 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
                menu = 0;
         }else if(menu == 0){
+
+            
+
+
             drawBackground(ren, level, score_font, colors, palette);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
@@ -193,12 +204,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //parameters
 
             //background
-            background(ren, colors[4*palette+3].r, colors[4*palette+3].g, colors[4*palette+3].b, WIDTH, HEIGHT, palette);
+            background(ren, colors[4*palette+3].r, colors[4*palette+3].g, colors[4*palette+3].b, WIDTH, HEIGHT);
 
             color(ren, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b, 255);
 
             rect(ren, 0, 0, WIDTH, spike_size/4, 1);//top
-            rect(ren, 0, HEIGHT-spike_size/4, WIDTH, spike_size/4, 1);//bottom
+            rect(ren, 0, HEIGHT-spike_size/4, WIDTH, spike_size/4 + 1, 1);//bottom
             rect(ren, 0, 0, spike_size/4, HEIGHT, 1);//left
             rect(ren, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
             /////blurrr
@@ -230,7 +241,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
             color(ren, colors[4*palette].r, colors[4*palette].g, colors[4*palette].b, 255);//line color
             for(int i = 1 ; i < 8 ; i++)
-                roundRect(ren, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
+            roundRect(ren, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
             color(ren, colors[4*palette + 1].r, colors[4*palette + 1].g, colors[4*palette + 1].b, 255);//cursor color
 
             //========================================================bird speed
@@ -268,13 +279,35 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 5*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);
             //=========================================================
 
+            //=========================================================6th cursor
+            roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[6], spike_size*2 + 6*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[6]);
+            text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 6*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
+            //=========================================================
 
-            for(int i = 6 ; i < 8 ; i++){
-                roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-                toChar(tmp, cursor_positions[i]);
-                text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + i*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
-            }
+            //=========================================================7th cursor
+            roundRect(ren, spike_size/4 + WIDTH/10 + cursor_positions[7], spike_size*2 + 7*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[7]);
+            text(ren, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 7*HEIGHT/10, tmp, setting_font_small, colors[4*palette + 2].r, colors[4*palette + 2].g, colors[4*palette + 2].b);//display a number in front of the setting bar
+            //=========================================================
+
+            
             bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+
+
+            printResetSettingsButton(ren, setting_font_small, colors, palette);
+
+
+
+
+
+
+
+
+
+
+
+
 
             
 
@@ -284,16 +317,6 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 menu = 0;
                 re = 0;
             }
-    
-
-
-
-
-
-
-
-
-
         }
 
 
@@ -341,8 +364,21 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                             if(rollover(evt.button.x, evt.button.y, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20))
                                 setting_selectionned = i;
                         }
-                        //update the selectionned setting :
-
+                        if(rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2)){
+                            bird_speed = ORIGINAL_BIRD_SPEED;//if it's upper than 30 may cause bugs
+                            gravity = ORIGINAL_GRAVITY;
+                            bird_jump_pwr = ORIGINAL_JUMP_PWR;
+                            bird_size = ORIGINAL_BIRD_SIZE;
+                            spike_increase = ORIGINAL_SPIKE_INCREASE;
+                            for(int i = 0 ; i < 8 ; i ++)
+                                cursor_positions[i] = 0;
+                            cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
+                            cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
+                            cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
+                            cursor_positions[4] = bird_size*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
+                            cursor_positions[5] = spike_increase*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the bird's size at 40
+                        }
+                    
 
 
 
@@ -367,6 +403,20 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             }
         }
         tick_count++;
+
+        int x = 0;
+        color(ren, 255, 0, 0, 255);
+        while(x < WIDTH){
+            line(ren, x, 0, x, HEIGHT);
+            x += WIDTH/20.0;
+        }
+        x= 0;
+        while(x < HEIGHT){
+            line(ren, 0, x, WIDTH, x);
+            x+=HEIGHT/20.0;
+        }
+
+
         SDL_Delay(1000/FRAMES_PER_SECOND);
         SDL_RenderPresent(ren);//refresh the render
     }
