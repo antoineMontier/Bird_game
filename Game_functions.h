@@ -55,3 +55,4 @@ void printSettingButton(SDL_Renderer* r, Color*c, int p);
 void printReturnButton(SDL_Renderer* r, Color*c, int p);
 void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p);
 void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int spike_size);
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize);
