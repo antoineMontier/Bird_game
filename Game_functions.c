@@ -386,3 +386,9 @@ void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l
     }while(*palette == k);
 
 }
+
+void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p){
+    color(r, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b, 255);
+    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, 10);
+    text(r, WIDTH/2 - 8*BUTTON_WIDTH/20, HEIGHT - 0.98*BUTTON_HEIGHT, "Reset", f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
+}
