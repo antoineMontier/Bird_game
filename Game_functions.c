@@ -174,12 +174,14 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
     }
 }
 
-void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, double bird_size){
-    color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);
+void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, double bird_size, double animation){
+    if(animation == 0)
+        return;
+    color(r, animation*c[4*p].r + (1-animation)*c[4*p + 3].r , animation*c[4*p].g + (1-animation)*c[4*p + 3].g, animation*c[4*p].b + (1-animation)*c[4*p + 3].b, 255);
     roundRect(r, b.x, b.y, bird_size, bird_size, 1, 10);
 
 
-    color(r, c[4*p+1].r, c[4*p+1].g, c[4*p+1].b, 255);
+    color(r, animation*c[4*p+1].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+1].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+1].b + (1-animation)*c[4*p + 3].b, 255);
     //========================================================================================
     if(facing == 1){//right
         triangle(r, b.x + 4.8*bird_size/5, 
@@ -190,7 +192,7 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, doubl
                     b.y + 2.2*bird_size/5, 1);//middle
         //eye
         circle(r, b.x + 3*bird_size/5, b.y + 1*bird_size/4, bird_size/8, 1);
-        color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
+        color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
         //wing if not jumped
         if(*j <= 0){
             triangle(r, b.x + bird_size/10, b.y + bird_size/2,//top
@@ -213,7 +215,7 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, doubl
                     b.y + 2.2*bird_size/5, 1);//middle
         //eye
         circle(r, b.x + 2*bird_size/5, b.y + 1*bird_size/4, bird_size/8, 1);
-        color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
+        color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
         //wing if not jumped
         if(*j <= 0){
             triangle(r, b.x + 9*bird_size/10, b.y + bird_size/2,//top
@@ -411,14 +413,15 @@ void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*
     cursor_positions[5] = (*si)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the spike difficulty at 40
 }
 
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl){
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size){
     background(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, WIDTH, HEIGHT);
     double text_animation;
-    if(*menu <= -1.0)//appear
-        text_animation = (*menu) + 2; //from 0 to 1
-    else if(*menu > -0.5)
-        text_animation = (-((*menu)*2 ) ); //from 1 to 0
 
+    if(*menu <= -1.0){//appear
+        text_animation = (*menu) + 2; //from 0 to 1
+    }else if(*menu > -0.5){
+        text_animation = (-((*menu)*2 ) ); //from 1 to 0
+    }
     if(*menu < -1.0){//animation of entry
         drawBackground(r, lvl, score, c, p, (1-text_animation));
     }
@@ -434,7 +437,10 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     rect(r, 0, 0, spike_size/4, HEIGHT, 1);//left
     rect(r, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
     /////blurrr
-    int pwr = text_animation*40;
+
+    drawSpikes(r, s_l, s_r, spike_nb, spike_size, 0, 0, c, p);
+
+    int pwr = text_animation*(spike_size);
     for(int i = 0 ; i <  pwr ; i ++){
         color(r,  ((pwr - i)/(double)pwr) *c[4*p + 2].r + (i/(double)pwr) * c[4*p + 3].r ,
         ((pwr - i)/(double)pwr) *c[4*p + 2].g + (i/(double)pwr) * c[4*p + 3].g ,
@@ -516,12 +522,14 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     if(*menu < -1.0){//update animation of entry
         (*menu)+= animation_speed;
         printRestartButton(r, c, p, 1 - text_animation);
+        drawBird(r, b, facing, j, c, p, bird_size, 1-text_animation);
     }
     if(*menu > -1.0 && *menu < -0.89)
         (*menu) = -1.0;
     if(*menu > -0.5 && *menu <= -0.001){//animation of exit
         *menu += animation_speed/2;
         printRestartButton(r, c, p,  1 - text_animation);
+        drawBird(r, b, facing, j, c, p, bird_size, 1-text_animation);
     }
     if(*menu >= -0.01)
         *menu = 0.0;
@@ -531,7 +539,6 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     printResetSettingsButton(r, small, c, p, text_animation);
     printReturnButton(r, c, p, text_animation);
 }
-
 
 
 
