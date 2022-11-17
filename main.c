@@ -104,20 +104,14 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //       -1for settings
     int setting_selectionned = 0; // 0 if no one is selectionned
 
-    double bird_speed = ORIGINAL_BIRD_SPEED;//if it's upper than 30 may cause bugs
-    double gravity = ORIGINAL_GRAVITY;
-    double bird_jump_pwr = ORIGINAL_JUMP_PWR;
-    double bird_size = ORIGINAL_BIRD_SIZE;
-    int spike_increase = ORIGINAL_SPIKE_INCREASE;
 
+    double bird_speed, gravity, bird_jump_pwr, bird_size;//game parameters
+    int spike_increase;
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
         temp[i] = 1;
     }
-
-    
-
     drawSpikes(ren, temp, temp, &spike_number, spike_size, app_l, app_r, colors, palette);
     free(temp);
     
@@ -126,13 +120,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     int* s_r = malloc(spike_number*sizeof(int));
     int* cursor_positions = malloc(8*sizeof(int));
     char*tmp = malloc(50*sizeof(char));
-    for(int i = 0 ; i < 8 ; i ++)
-    cursor_positions[i] = 0;
-    cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
-    cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
-    cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
-    cursor_positions[4] = bird_size*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
-    cursor_positions[5] = spike_increase*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the bird's size at 40
+
+
+    resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, spike_size);
 
 
     startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
@@ -364,24 +354,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                             if(rollover(evt.button.x, evt.button.y, spike_size/4 + WIDTH/10 + cursor_positions[i], spike_size*2 + i*HEIGHT/10 - 5, 10, 20))
                                 setting_selectionned = i;
                         }
-                        if(rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2)){
-                            bird_speed = ORIGINAL_BIRD_SPEED;//if it's upper than 30 may cause bugs
-                            gravity = ORIGINAL_GRAVITY;
-                            bird_jump_pwr = ORIGINAL_JUMP_PWR;
-                            bird_size = ORIGINAL_BIRD_SIZE;
-                            spike_increase = ORIGINAL_SPIKE_INCREASE;
-                            for(int i = 0 ; i < 8 ; i ++)
-                                cursor_positions[i] = 0;
-                            cursor_positions[1] = bird_speed*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
-                            cursor_positions[2] = gravity*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
-                            cursor_positions[3] = bird_jump_pwr*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
-                            cursor_positions[4] = bird_size*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
-                            cursor_positions[5] = spike_increase*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the bird's size at 40
-                        }
-                    
-
-
-
+                        if(rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2))
+                            resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, spike_size);
                     }
                     break;
 
