@@ -134,7 +134,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //draw landscape
     drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
     //draw bird
-    drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
+    drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
 
     menu = 0.0;
 
@@ -170,7 +170,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
-            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
                menu = 0;
         }else if(menu == 0.0){
@@ -180,7 +180,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
             drawBackground(ren, level, score_font, colors, palette, 1);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
-            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
             printRestartButton(ren, colors, palette, 1);
             printSettingButton(ren, colors, palette);
             if(k){
@@ -198,7 +198,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 menu = -0.49;
                 re = 0;
             }
-            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level);
+            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size);
             //printf("\n\nm : %f\n", menu);
         }
 
