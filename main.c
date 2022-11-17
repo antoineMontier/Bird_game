@@ -98,7 +98,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     bird birdy;
     double app_r = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_l = 21;                  //-1 if facing left, 1 if facing right
-    int jumped, menu = 0, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, re = 0, spike_number = NB_SPIKES*2;
+    double menu = 0;
+    int jumped, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, re = 0, spike_number = NB_SPIKES*2;
     //        0for starting bg
     //        1for play
     //       -1for settings
@@ -135,7 +136,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //draw bird
     drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
 
-    menu = 0;
+    menu = 0.0;
 
 
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -147,7 +148,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
 
-        if(menu == 1){
+        if(menu == 1.0){
             //update positions
             if(facing == -1 && prev_facing == 1)
                 update_r = 1;
@@ -172,7 +173,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
                menu = 0;
-        }else if(menu == 0){
+        }else if(menu == 0.0){
 
             
 
@@ -187,21 +188,17 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 k = 0;
             }
             if(s){
-                menu = -1;
+                menu = -1.99;
                 s = 0;
             }
-        }else if(menu == -1){
+        }else if(menu > -2.0 && menu <= -1.0){
             //parameters
-            printSettingMenu(ren, setting_font_big, setting_font_small, cursor_positions, spike_size, colors, palette, tmp, &bird_size);
-            
+            printSettingMenu(ren, setting_font_big, setting_font_small, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu);
             if(re){//exit parameters
-                menu = 0;
+                menu = 0.0;
                 re = 0;
             }
         }
-
-
-
 
 
         //controls
@@ -230,15 +227,15 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if(menu == 1){
+                    if(menu == 1.0){
                         birdy.vy = -bird_jump_pwr;
                         jumped = 90;
                     }
-                    if(menu == 0){
+                    if(menu == 0.0){
                         k = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT);
                         s = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3);
                     }
-                    if(menu == -1){
+                    if(menu == -1.0){
                         //setting_selectionned = 0;
                         re = rollover(evt.button.x, evt.button.y, WIDTH - BUTTON_WIDTH, BUTTON_HEIGHT/2, BUTTON_WIDTH/2, BUTTON_HEIGHT/2);
                         for(int i = 1 ; i < 8 && setting_selectionned == 0; i++){
@@ -251,12 +248,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                     break;
 
                 case SDL_MOUSEMOTION:
-                    if(menu == -1 && setting_selectionned != 0)
+                    if(menu == -1.0 && setting_selectionned != 0.0)
                         cursor_positions[setting_selectionned] = evt.button.x - (spike_size/4 + WIDTH/10);
                     break;
 
                 case SDL_MOUSEBUTTONUP:
-                    if(menu == -1)
+                    if(menu == -1.0)
                         setting_selectionned = 0;
                     break;
 
@@ -268,8 +265,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             }
         }
         tick_count++;
-/////red lines
-        int x = 0;
+        /////red lines
+        /*int x = 0;
         color(ren, 255, 0, 0, 255);
         while(x < WIDTH){
             line(ren, x, 0, x, HEIGHT);
@@ -279,8 +276,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         while(x < HEIGHT){
             line(ren, 0, x, WIDTH, x);
             x+=HEIGHT/20.0;
-        }
-
+        }*/
 
         SDL_Delay(1000/FRAMES_PER_SECOND);
         SDL_RenderPresent(ren);//refresh the render
