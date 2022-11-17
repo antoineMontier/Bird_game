@@ -50,9 +50,9 @@ void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r,
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p, double bird_size);
 void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb, double bird_size);
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, int*menu, double bird_speed, double bird_size);
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, double*menu, double bird_speed, double bird_size);
 void printSettingButton(SDL_Renderer* r, Color*c, int p);
-void printReturnButton(SDL_Renderer* r, Color*c, int p);
-void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p);
+void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation);
+void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p, double animation);
 void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int spike_size);
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize);
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu);
