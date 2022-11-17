@@ -29,6 +29,7 @@ void printRestartButton(SDL_Renderer* r, Color*c, int p){
 void printSettingButton(SDL_Renderer* r, Color*c, int p){
     color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
     roundRect(r, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3, 0, BUTTON_HEIGHT/6);//external rect
+
     //cx = WIDTH/2 //cy = HEIGHT/2 + 4*BUTTON_HEIGHT/3
 
     circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 4*BUTTON_WIDTH/20, 1);
@@ -40,7 +41,7 @@ void printSettingButton(SDL_Renderer* r, Color*c, int p){
         angle += 3.1415/5;
     }
     color(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, 255);
-    circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 3*BUTTON_WIDTH/20, 1);
+    circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 2.2*BUTTON_WIDTH/20, 1);
 }
 
 void printReturnButton(SDL_Renderer* r, Color*c, int p){
@@ -407,3 +408,105 @@ void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*
     cursor_positions[4] = (*bsz)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
     cursor_positions[5] = (*si)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the spike difficulty at 40
 }
+
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize){
+    background(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, WIDTH, HEIGHT);
+
+            color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
+
+            rect(r, 0, 0, WIDTH, spike_size/4, 1);//top
+            rect(r, 0, HEIGHT-spike_size/4, WIDTH, spike_size/4 + 1, 1);//bottom
+            rect(r, 0, 0, spike_size/4, HEIGHT, 1);//left
+            rect(r, WIDTH-spike_size/4, 0, spike_size/4 +1, HEIGHT, 1);//right
+            /////blurrr
+            int pwr = 40;
+            for(int i = 0 ; i <  pwr ; i ++){
+                color(r,  ((pwr - i)/(double)pwr) *c[4*p + 2].r + (i/(double)pwr) * c[4*p + 3].r ,
+                            ((pwr - i)/(double)pwr) *c[4*p + 2].g + (i/(double)pwr) * c[4*p + 3].g ,
+                            ((pwr - i)/(double)pwr) *c[4*p + 2].b + (i/(double)pwr) * c[4*p + 3].b , 255);
+                line(r, spike_size/4 + i, spike_size/4 + i, WIDTH - spike_size/4 - i, spike_size/4 + i);//top
+                line(r, spike_size/4 + i, HEIGHT - spike_size/4 - i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//bottom
+                line(r, spike_size/4 + i, spike_size/4 + i, spike_size/4 + i, HEIGHT - spike_size/4 - i);//left
+                line(r, WIDTH - spike_size/4 - i, spike_size/4 + i, WIDTH - spike_size/4 - i, HEIGHT - spike_size/4 - i);//left
+            }   
+            //////
+
+            //text
+            text(r, 9.7*WIDTH/40, 50, "Settings", big, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b);
+
+
+            ///////////////////replace the cursors on the bar before displaying them
+            for(int i = 0 ; i < 8 ; i ++){
+                if(cursor_positions[i] < 0)
+                    cursor_positions[i] = 0;
+                else if(cursor_positions[i] > WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))
+                    cursor_positions[i] = WIDTH - 2*(spike_size/4 + WIDTH/10 + 2);
+            }
+            /////////////////
+
+
+            color(r, c[4*p].r, c[4*p].g, c[4*p].b, 255);//line color
+            for(int i = 1 ; i < 8 ; i++)
+            roundRect(r, spike_size/4 + WIDTH/10, spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
+            color(r, c[4*p + 1].r, c[4*p + 1].g, c[4*p + 1].b, 255);//cursor color
+
+            //========================================================bird speed
+            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 1*HEIGHT/10, "Speed", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[1], spike_size*2 + 1*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 1*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            //=========================================================
+
+            //=========================================================gravity
+            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 2*HEIGHT/10, "Gravity", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[2], spike_size*2 + 2*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 2*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            //=========================================================
+
+            //=========================================================jump power
+            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 3*HEIGHT/10, "Jump power", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[3], spike_size*2 + 3*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[3]*(MAX_JUMP+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 3*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            //=========================================================
+            
+            //=========================================================bird size
+            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 4*HEIGHT/10, "Size", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[4], spike_size*2 + 4*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[4]*(BIRD_MAX_SIZE+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 4*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            //=========================================================
+
+            //=========================================================spike incrementation
+            text(r, spike_size/4 + WIDTH/10, spike_size*1.5 + 5*HEIGHT/10, "Spike simplicity", small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[5], spike_size*2 + 5*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 5*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+            //=========================================================
+
+            //=========================================================6th cursor
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[6], spike_size*2 + 6*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[6]);
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 6*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);//display a number in front of the setting bar
+            //=========================================================
+
+            //=========================================================7th cursor
+            roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[7], spike_size*2 + 7*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
+            toChar(tmp, cursor_positions[7]);
+            text(r, WIDTH - 1.8*WIDTH/10, 4.3*spike_size/2 + 7*HEIGHT/10, tmp, small, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);//display a number in front of the setting bar
+            //=========================================================
+
+            *birdsize = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+
+
+            printResetSettingsButton(r, small, c, p);
+            printReturnButton(r, c, p);
+}
+
+
+
+
+
+
+
