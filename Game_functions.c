@@ -392,3 +392,18 @@ void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p){
     roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, 10);
     text(r, WIDTH/2 - 8*BUTTON_WIDTH/20, HEIGHT - 0.98*BUTTON_HEIGHT, "Reset", f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
 }
+
+void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int spike_size){
+    *bsp = ORIGINAL_BIRD_SPEED;//if it's upper than 30 may cause bugs
+    *g = ORIGINAL_GRAVITY;
+    *jp = ORIGINAL_JUMP_PWR;
+    *bsz = ORIGINAL_BIRD_SIZE;
+    *si = ORIGINAL_SPIKE_INCREASE;
+    for(int i = 0 ; i < 8 ; i ++)
+        cursor_positions[i] = 0;
+    cursor_positions[1] = (*bsp)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
+    cursor_positions[2] = (*g)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_GRAVITY);//initialize the gravity at 9.81
+    cursor_positions[3] = (*jp)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
+    cursor_positions[4] = (*bsz)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
+    cursor_positions[5] = (*si)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the spike difficulty at 40
+}
