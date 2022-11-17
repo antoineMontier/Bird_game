@@ -130,7 +130,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
     
-    drawBackground(ren, level, score_font, colors, palette);
+    drawBackground(ren, level, score_font, colors, palette, 1);
     //draw landscape
     drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
     //draw bird
@@ -166,7 +166,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r, spike_increase);
             //draw background
-            drawBackground(ren, level, score_font, colors, palette);
+            drawBackground(ren, level, score_font, colors, palette, 1);
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
@@ -178,10 +178,10 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             
 
 
-            drawBackground(ren, level, score_font, colors, palette);
+            drawBackground(ren, level, score_font, colors, palette, 1);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size);
-            printRestartButton(ren, colors, palette);
+            printRestartButton(ren, colors, palette, 1);
             printSettingButton(ren, colors, palette);
             if(k){
                 startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
@@ -191,13 +191,15 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 menu = -1.99;
                 s = 0;
             }
-        }else if(menu > -2.0 && menu <= -1.0){
+        }else if(menu > -2.0 && menu <= -0.0001){
             //parameters
-            printSettingMenu(ren, setting_font_big, setting_font_small, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu);
+            
             if(re){//exit parameters
-                menu = 0.0;
+                menu = -0.49;
                 re = 0;
             }
+            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level);
+            //printf("\n\nm : %f\n", menu);
         }
 
 
