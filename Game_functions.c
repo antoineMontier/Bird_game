@@ -111,7 +111,7 @@ void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, d
 }
 
 void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int *u_l, int *u_r, int spike_increase){
-    srand(time(0));
+    
 
 
     if(facing == 1){
@@ -152,6 +152,7 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
         for(int i = 0 ;i < spike_nb ; i++){
             s_l[i] = 0;
         }
+        srand(time(0)); 
         while(visibles > 0){
             do{
                 ind = rand() % spike_nb;
@@ -165,6 +166,7 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
         for(int i = 0 ;i < spike_nb ; i++){
             s_r[i] = 0;
         }
+        srand(time(0) + 5); 
         while(visibles > 0){
             do{
                 ind = rand() % spike_nb;
@@ -418,7 +420,7 @@ void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*
 
 }
 
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation){
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int hlvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation){
     background(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, WIDTH, HEIGHT);
     double text_animation = (*animation)/500.0;
 
@@ -467,7 +469,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
             cursor_positions[i] = WIDTH - 2*(spike_size/4 + WIDTH/10 + 2);
     }
     /////////////////end replace
-    color(r, text_animation*c[4*p].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p].b + (1-text_animation)*c[4*p + 3].b, 255);;//line color
+    color(r, text_animation*c[4*p].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p].b + (1-text_animation)*c[4*p + 3].b, 255);//line color
     for(int i = 1 ; i < 8 ; i++)
         roundRect(r, spike_size/4 + WIDTH/10, text_animation*spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
     color(r, text_animation*c[4*p+1].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p+1].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p+1].b + (1-text_animation)*c[4*p + 3].b, 255);//cursor color
@@ -528,6 +530,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
         printRestartButton(r, c, p, 1 - text_animation);
     }
     if(*menu < -1.2){
+        printHighScore(r, small, tmp, hlvl, c, p, 1- text_animation);
         printSettingButton(r, c, p, 1- text_animation);
         drawBird(r, b, facing, j, c, p, bird_size, 1-text_animation);
     }
@@ -539,6 +542,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
         printRestartButton(r, c, p,  1 - text_animation);
     }
     if(*menu > -0.3 && *menu <= -0.00001){//animation of exit
+        printHighScore(r, small, tmp, hlvl, c, p, 1- text_animation);
         printSettingButton(r, c, p, 1- text_animation);
         drawBird(r, b, facing, j, c, p, bird_size, 1-text_animation);
     }
@@ -555,7 +559,17 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     printReturnButton(r, c, p, text_animation);
 }
 
-
+void printHighScore(SDL_Renderer* r, TTF_Font*f, char*tmp, int high, Color*c, int p, double animation){
+    if(animation == 0)
+        return;
+    //text"HI :
+    text(r, animation*animation*WIDTH*0.05, HEIGHT*0.035, "High:", f, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
+    //box:
+    color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
+    roundRect(r, (5 - 4*animation)*WIDTH*0.0443, HEIGHT*0.07, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, BUTTON_HEIGHT/5);
+    toChar(tmp, high);
+    text(r, WIDTH*0.077, (2-animation)*HEIGHT*0.07, tmp, f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
+}
 
 
 
