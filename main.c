@@ -196,6 +196,10 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 re = 0;
             }
             printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, &animation);
+            if(level == 0){
+                birdy.x = WIDTH/2 - bird_size/2;
+            }
+            
             //printf("\n\nm : %f\n", menu);
         }
 
@@ -231,8 +235,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                         jumped = 90;
                     }
                     if(menu == 0.0){
-                        k = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT);
-                        s = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3);
+                        k = rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 + BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT);
+                        s = rollover(evt.button.x, evt.button.y, WIDTH - (WIDTH/2 + BUTTON_WIDTH/3), HEIGHT/2 + BUTTON_HEIGHT*2, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3);
                     }
                     if(menu == -1.0){
                         //setting_selectionned = 0;
@@ -263,7 +267,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
             }
         }
-        tick_count++;
+        tick_count++; 
         /////red lines
         /*int x = 0;
         color(ren, 255, 0, 0, 255);
