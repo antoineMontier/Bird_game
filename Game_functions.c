@@ -436,7 +436,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
         drawBackground(r, lvl, score, c, p, (1-text_animation));
     
 
-    //printf("%f\n", text_animation);
+    printf("%f\n", text_animation);
 
     color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
     rect(r, 0, 0, WIDTH, spike_size/4, 1);//top
@@ -460,7 +460,8 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     //////en blurrr
 
     //text
-    text(r, 9.7*WIDTH/40, text_animation*50, "Settings", big, text_animation*c[4*p + 1].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 1].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 1].b + (1-text_animation)*c[4*p + 3].b);
+    if(text_animation > 0.1)
+        text(r, 9.7*WIDTH/40, text_animation*50, "Settings", big, text_animation*c[4*p + 1].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 1].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 1].b + (1-text_animation)*c[4*p + 3].b);
     ///////////////////replace the cursors on the bar before displaying them
     for(int i = 0 ; i < 8 ; i ++){
         if(cursor_positions[i] < 0)
@@ -470,7 +471,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     }
     /////////////////end replace
     color(r, text_animation*c[4*p].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p].b + (1-text_animation)*c[4*p + 3].b, 255);//line color
-    for(int i = 1 ; i < 8 ; i++)
+    for(int i = 1 ; i < 8 && text_animation > 0.4; i++)
         roundRect(r, spike_size/4 + WIDTH/10, text_animation*spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
     color(r, text_animation*c[4*p+1].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p+1].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p+1].b + (1-text_animation)*c[4*p + 3].b, 255);//cursor color
 
@@ -527,7 +528,8 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     double animation_speed = (*animation)/500.0;
     if(*menu < -1.0){//update animation of entry
         (*menu)+= animation_speed;
-        printRestartButton(r, c, p, 1 - text_animation);
+        if(text_animation < 0.8)
+            printRestartButton(r, c, p, 1 - text_animation);
     }
     if(*menu < -1.2){
         printHighScore(r, small, tmp, hlvl, c, p, 1- text_animation);
@@ -539,7 +541,8 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
         (*menu) = -1.0;
     if(*menu > -0.5 && *menu <= -0.00001){//animation of exit
         *menu += animation_speed/2;
-        printRestartButton(r, c, p,  1 - text_animation);
+        if(text_animation < 0.6)
+            printRestartButton(r, c, p,  1 - text_animation);
     }
     if(*menu > -0.3 && *menu <= -0.00001){//animation of exit
         printHighScore(r, small, tmp, hlvl, c, p, 1- text_animation);
@@ -566,7 +569,7 @@ void printHighScore(SDL_Renderer* r, TTF_Font*f, char*tmp, int high, Color*c, in
     text(r, animation*animation*WIDTH*0.05, HEIGHT*0.035, "High:", f, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b);
     //box:
     color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
-    roundRect(r, (5 - 4*animation)*WIDTH*0.0443, HEIGHT*0.07, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, BUTTON_HEIGHT/5);
+    roundRect(r, (3 - 2*animation)*WIDTH*0.0443, HEIGHT*0.07, BUTTON_WIDTH, BUTTON_HEIGHT/2, 1, BUTTON_HEIGHT/5);
     toChar(tmp, high);
     text(r, WIDTH*0.077, (2-animation)*HEIGHT*0.07, tmp, f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
 }
