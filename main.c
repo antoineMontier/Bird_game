@@ -121,6 +121,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     int* cursor_positions = malloc(8*sizeof(int));
     char*tmp = malloc(50*sizeof(char));
 
+
+
+
     //=============== open file containing the high score :
     FILE* best_score = fopen("./bestscore.txt", "r");
     if(best_score == NULL)
@@ -135,8 +138,12 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
     resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, &animation, spike_size);
 
+    double*prev_x = malloc(TAIL_LENGTH*sizeof(double));
+    double*prev_y = malloc(TAIL_LENGTH*sizeof(double));
 
-    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
+    startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, prev_x, prev_y, bird_size);
+    
+
 
 
     
@@ -144,7 +151,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     //draw landscape
     drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
     //draw bird
-    drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
+    drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, prev_x, prev_y, 1);
 
     menu = 0.0;
 
@@ -168,7 +175,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
-            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, prev_x, prev_y, 1);
         }
 
         if(menu >0.0 && menu <= 1.0){//playing screen
@@ -185,7 +192,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
 
-            moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size);
+            moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size, prev_x, prev_y);
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r, spike_increase);
             //draw background
             drawBackground(ren, level, score_font, colors, palette, 1);
@@ -203,22 +210,21 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
-            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, prev_x, prev_y, 1);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
                 menu = 1.01; 
-
+            //printf("(%f ; %f) ==> (%f ; %f)\n", prev_x[TAIL_LENGTH], prev_y[TAIL_LENGTH], prev_x[0], prev_y[0]);
 
         }else if(menu == 0.0){//starting screen
             drawBackground(ren, level, score_font, colors, palette, 1);
             printHighScore(ren, setting_font_small, tmp, high_level, colors, palette, 1);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
-            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, prev_x, prev_y, 1);
             printRestartButton(ren, colors, palette, 1);
             printSettingButton(ren, colors, palette, 1);
             if(k){
-                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
-                menu = 0.01;
-                k = 0;
+                startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, prev_x, prev_y, bird_size);
+                k = 0; 
             }
             if(s){
                 menu = -1.99;
@@ -231,7 +237,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 menu = -0.49;
                 re = 0;
             }
-            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, high_level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, &animation);
+            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, high_level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, prev_x, prev_y, &animation);
             //apply changes
             bird_speed = cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
@@ -336,6 +342,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     TTF_CloseFont(setting_font_big);
     TTF_CloseFont(score_font);
     closeSDL(&w, &ren);
+    free(prev_x);
+    free(prev_y);
     free(tmp);
     free(cursor_positions);
     free(s_l);
