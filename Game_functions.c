@@ -15,14 +15,14 @@ void printRestartButton(SDL_Renderer* r, Color*c, int p, double animation){
         return;
     
     color(r, animation*c[4*p].r + (1-animation)*c[4*p + 3].r , animation*c[4*p].g + (1-animation)*c[4*p + 3].g, animation*c[4*p].b + (1-animation)*c[4*p + 3].b, 255);
-    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 - animation*BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 1, BUTTON_HEIGHT/3);
+    roundRect(r, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT/2 + animation*BUTTON_HEIGHT/2, BUTTON_WIDTH, BUTTON_HEIGHT, 1, BUTTON_HEIGHT/3);
     color(r, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b, 255);
     triangle(r  , WIDTH/2 -  (BUTTON_WIDTH/2 -  3*BUTTON_WIDTH/10)
-                , HEIGHT/2 - (BUTTON_HEIGHT/2 - 3*BUTTON_HEIGHT/10) + (1-animation)*BUTTON_HEIGHT/2
+                , HEIGHT/2 - (BUTTON_HEIGHT/2 - 3*BUTTON_HEIGHT/10) + (1-animation)*BUTTON_HEIGHT/2 + BUTTON_HEIGHT
                 , WIDTH/2 -  (BUTTON_WIDTH/2 -  3*BUTTON_WIDTH/10)
-                , HEIGHT/2 - animation*(BUTTON_HEIGHT/2 - 7*BUTTON_HEIGHT/10) + (1-animation)*2*BUTTON_HEIGHT/3
+                , HEIGHT/2 - animation*(BUTTON_HEIGHT/2 - 7*BUTTON_HEIGHT/10) + (1-animation)*2*BUTTON_HEIGHT/3 + BUTTON_HEIGHT
                 , WIDTH/2 -  (BUTTON_WIDTH/2 - 7.5*BUTTON_WIDTH/10)
-                , HEIGHT/2 + (1-animation)*BUTTON_HEIGHT/2
+                , HEIGHT/2 + (1-animation)*BUTTON_HEIGHT/2 + BUTTON_HEIGHT
                 , 1);
 }
 
@@ -30,20 +30,20 @@ void printSettingButton(SDL_Renderer* r, Color*c, int p, double animation){
     if(animation == 0)
         return;
     color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
-    roundRect(r, WIDTH - animation*(WIDTH/2 + BUTTON_WIDTH/3), HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3, 0, BUTTON_HEIGHT/6);//external rect
+    roundRect(r, WIDTH - animation*(WIDTH/2 + BUTTON_WIDTH/3), HEIGHT/2 + BUTTON_HEIGHT*2, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3, 0, BUTTON_HEIGHT/6);//external rect
 
     //cx = WIDTH/2 //cy = HEIGHT/2 + 4*BUTTON_HEIGHT/3
 
-    circle(r, animation*WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 4*BUTTON_WIDTH/20, 1);
+    circle(r, animation*WIDTH/2, HEIGHT/2 + 7*BUTTON_HEIGHT/3, 4*BUTTON_WIDTH/20, 1);
 
     double angle = 0;
 
     while(angle <= 2*3.1415){
-        circle(r, animation*WIDTH/2 +  (4*BUTTON_WIDTH/20)*cos(angle),HEIGHT/2 + 4*BUTTON_HEIGHT/3 + (4*BUTTON_WIDTH/20)*sin(angle), BUTTON_WIDTH/20, 1);
+        circle(r, animation*WIDTH/2 +  (4*BUTTON_WIDTH/20)*cos(angle),HEIGHT/2 + 7*BUTTON_HEIGHT/3 + (4*BUTTON_WIDTH/20)*sin(angle), BUTTON_WIDTH/20, 1);
         angle += 3.1415/5;
     }
     color(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, 255);
-    circle(r, animation*WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 2.2*BUTTON_WIDTH/20, 1);
+    circle(r, animation*WIDTH/2, HEIGHT/2 + 7*BUTTON_HEIGHT/3, 2.2*BUTTON_WIDTH/20, 1);
 }
 
 void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation){
@@ -179,7 +179,7 @@ void spikeUpdate(int *s_l, int*s_r, int spike_nb, int lvl, double*a_l, double*a_
 void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, double bird_size, double animation){
     if(animation == 0)
         return;
-    color(r, animation*c[4*p].r + (1-animation)*c[4*p + 3].r , animation*c[4*p].g + (1-animation)*c[4*p + 3].g, animation*c[4*p].b + (1-animation)*c[4*p + 3].b, 255);
+    color(r, animation*c[4*p].r + (1-animation)*c[4*p + 3].r , animation*c[4*p].g + (1-animation)*c[4*p + 3].g, animation*c[4*p].b + (1-animation)*c[4*p + 3].b, animation);
     roundRect(r, b.x, animation*b.y, bird_size, bird_size, 1, 10);
 
 
@@ -554,3 +554,9 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     printResetSettingsButton(r, small, c, p, text_animation);
     printReturnButton(r, c, p, text_animation);
 }
+
+
+
+
+
+
