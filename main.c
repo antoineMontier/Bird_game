@@ -99,7 +99,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     double app_r = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_l = 21;                  //-1 if facing left, 1 if facing right
     double menu = 0;
-    int jumped, prev_facing, facing = 1, update_r, update_l, level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, re = 0, spike_number = NB_SPIKES*2;
+    int jumped, prev_facing, facing = 1, update_r, update_l, level = 0, high_level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, re = 0, spike_number = NB_SPIKES*2;
     //        0for starting bg
     //        1for play
     //       -1for settings
@@ -115,13 +115,23 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     }
     drawSpikes(ren, temp, temp, &spike_number, spike_size, app_l, app_r, colors, palette);
     free(temp);
-    
 
     int* s_l = malloc(spike_number*sizeof(int));
     int* s_r = malloc(spike_number*sizeof(int));
     int* cursor_positions = malloc(8*sizeof(int));
     char*tmp = malloc(50*sizeof(char));
 
+    //=============== open file containing the high score :
+    FILE* best_score = fopen("./bestscore.txt", "r");
+    if(best_score == NULL)
+        fprintf(stderr, "failed to open file");
+    fscanf(best_score, "%d", &high_level);//get the previous high score
+    //remove("./best_score.txt");
+    fclose(best_score);
+
+    FILE* best_scoree = fopen("./bestscore.txt", "wt");
+
+    //==============
 
     resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, &animation, spike_size);
 
@@ -149,6 +159,9 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
         if(menu == 1.0){
+            //update level
+            if(level > high_level)
+                high_level = level;
             //update positions
             if(facing == -1 && prev_facing == 1)
                 update_r = 1;
@@ -168,14 +181,17 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             spikeUpdate(s_l, s_r, spike_number, level, &app_l, &app_r, facing, &update_l, &update_r, spike_increase);
             //draw background
             drawBackground(ren, level, score_font, colors, palette, 1);
+            printHighScore(ren, setting_font_small, tmp, high_level, colors, palette, 1);
+
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
-               menu = 0;
-        }else if(menu == 0.0){
+                menu = 0; 
+            }else if(menu == 0.0){
             drawBackground(ren, level, score_font, colors, palette, 1);
+            printHighScore(ren, setting_font_small, tmp, high_level, colors, palette, 1);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
             printRestartButton(ren, colors, palette, 1);
@@ -195,7 +211,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 menu = -0.49;
                 re = 0;
             }
-            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, &animation);
+            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, high_level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, &animation);
             if(level == 0){
                 birdy.x = WIDTH/2 - bird_size/2;
             }
@@ -273,17 +289,21 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
         color(ren, 255, 0, 0, 255);
         while(x < WIDTH){
             line(ren, x, 0, x, HEIGHT);
-            x += WIDTH/20.0;
+            x += WIDTH/40.0;
         }
         x= 0;
         while(x < HEIGHT){
             line(ren, 0, x, WIDTH, x);
-            x+=HEIGHT/20.0;
+            x+=HEIGHT/40.0;
         }*/
 
         SDL_Delay(1000/FRAMES_PER_SECOND);
         SDL_RenderPresent(ren);//refresh the render
     }
+    //===== update file
+    fprintf(best_score, "%d", high_level);
+    fclose(best_scoree);
+    //=====
     TTF_CloseFont(setting_font_small);
     TTF_CloseFont(setting_font_big);
     TTF_CloseFont(score_font);
