@@ -191,9 +191,8 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, doubl
     avg_y /= TAIL_LENGTH;
     avg_x /= TAIL_LENGTH;
 
-    color(r, c[4*p+1].r,//red
-            c[4*p+1].g,//green
-            c[4*p+1].b, 1);//blue
+    color(r, animation*c[4*p+1].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+1].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+1].b + (1-animation)*c[4*p + 3].b, animation);
+
     if(facing == 1){
         triangle(r, b.x + bird_size*0.1, animation*b.y + bird_size*0.1,//top
                 b.x + bird_size*0.9, animation*b.y + bird_size*0.9,//down
