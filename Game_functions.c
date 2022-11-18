@@ -26,22 +26,24 @@ void printRestartButton(SDL_Renderer* r, Color*c, int p, double animation){
                 , 1);
 }
 
-void printSettingButton(SDL_Renderer* r, Color*c, int p){
-    color(r, c[4*p + 2].r, c[4*p + 2].g, c[4*p + 2].b, 255);
-    roundRect(r, WIDTH/2 - BUTTON_WIDTH/3, HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3, 0, BUTTON_HEIGHT/6);//external rect
+void printSettingButton(SDL_Renderer* r, Color*c, int p, double animation){
+    if(animation == 0)
+        return;
+    color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
+    roundRect(r, WIDTH - animation*(WIDTH/2 + BUTTON_WIDTH/3), HEIGHT/2 + BUTTON_HEIGHT, 2*BUTTON_WIDTH/3, 2*BUTTON_HEIGHT/3, 0, BUTTON_HEIGHT/6);//external rect
 
     //cx = WIDTH/2 //cy = HEIGHT/2 + 4*BUTTON_HEIGHT/3
 
-    circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 4*BUTTON_WIDTH/20, 1);
+    circle(r, animation*WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 4*BUTTON_WIDTH/20, 1);
 
     double angle = 0;
 
     while(angle <= 2*3.1415){
-        circle(r, WIDTH/2 +  (4*BUTTON_WIDTH/20)*cos(angle),HEIGHT/2 + 4*BUTTON_HEIGHT/3 + (4*BUTTON_WIDTH/20)*sin(angle), BUTTON_WIDTH/20, 1);
+        circle(r, animation*WIDTH/2 +  (4*BUTTON_WIDTH/20)*cos(angle),HEIGHT/2 + 4*BUTTON_HEIGHT/3 + (4*BUTTON_WIDTH/20)*sin(angle), BUTTON_WIDTH/20, 1);
         angle += 3.1415/5;
     }
     color(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, 255);
-    circle(r, WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 2.2*BUTTON_WIDTH/20, 1);
+    circle(r, animation*WIDTH/2, HEIGHT/2 + 4*BUTTON_HEIGHT/3, 2.2*BUTTON_WIDTH/20, 1);
 }
 
 void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation){
@@ -178,53 +180,53 @@ void drawBird(SDL_Renderer* r, bird b, int facing, int*j,  Color*c, int p, doubl
     if(animation == 0)
         return;
     color(r, animation*c[4*p].r + (1-animation)*c[4*p + 3].r , animation*c[4*p].g + (1-animation)*c[4*p + 3].g, animation*c[4*p].b + (1-animation)*c[4*p + 3].b, 255);
-    roundRect(r, b.x, b.y, bird_size, bird_size, 1, 10);
+    roundRect(r, b.x, animation*b.y, bird_size, bird_size, 1, 10);
 
 
     color(r, animation*c[4*p+1].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+1].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+1].b + (1-animation)*c[4*p + 3].b, 255);
     //========================================================================================
     if(facing == 1){//right
         triangle(r, b.x + 4.8*bird_size/5, 
-                    b.y + 1.2*bird_size/5,//top
+                    animation*b.y + 1.2*bird_size/5,//top
                     b.x + 4.8*bird_size/5,
-                    b.y + 3.2*bird_size/5,//down
+                    animation*b.y + 3.2*bird_size/5,//down
                     b.x + 6*bird_size/5,
-                    b.y + 2.2*bird_size/5, 1);//middle
+                    animation*b.y + 2.2*bird_size/5, 1);//middle
         //eye
-        circle(r, b.x + 3*bird_size/5, b.y + 1*bird_size/4, bird_size/8, 1);
+        circle(r, b.x + 3*bird_size/5, animation*b.y + 1*bird_size/4, bird_size/8, 1);
         color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
         //wing if not jumped
         if(*j <= 0){
-            triangle(r, b.x + bird_size/10, b.y + bird_size/2,//top
-                        b.x + 5*bird_size/10, b.y + bird_size/2,//left
-                        b.x + bird_size/10, b.y + 9*bird_size/10, 1);//down
+            triangle(r, b.x + bird_size/10, animation*b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, animation*b.y + bird_size/2,//left
+                        b.x + bird_size/10, animation*b.y + 9*bird_size/10, 1);//down
         }else{//wing if jumped
-            triangle(r, b.x + bird_size/10, b.y + bird_size/2,//top
-                        b.x + 5*bird_size/10, b.y + bird_size/2,//left
-                        b.x + bird_size/10, b.y + (9 - (*j)/10 )*bird_size/10, 1);//down
+            triangle(r, b.x + bird_size/10, animation*b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, animation*b.y + bird_size/2,//left
+                        b.x + bird_size/10, animation*b.y + (9 - (*j)/10 )*bird_size/10, 1);//down
             (*j)-= WING_SPEED;
         }
             
     //========================================================================================
     }else if(facing == -1){//left
         triangle(r, b.x +0.2*bird_size/5, 
-                    b.y + 1.2*bird_size/5,//top
+                    animation*b.y + 1.2*bird_size/5,//top
                     b.x +0.2*bird_size/5,
-                    b.y + 3.2*bird_size/5,//down
+                    animation*b.y + 3.2*bird_size/5,//down
                     b.x -1*bird_size/5,
-                    b.y + 2.2*bird_size/5, 1);//middle
+                    animation*b.y + 2.2*bird_size/5, 1);//middle
         //eye
-        circle(r, b.x + 2*bird_size/5, b.y + 1*bird_size/4, bird_size/8, 1);
+        circle(r, b.x + 2*bird_size/5, animation*b.y + 1*bird_size/4, bird_size/8, 1);
         color(r, animation*c[4*p+2].r + (1-animation)*c[4*p + 3].r , animation*c[4*p+2].g + (1-animation)*c[4*p + 3].g, animation*c[4*p+2].b + (1-animation)*c[4*p + 3].b, 255);
         //wing if not jumped
         if(*j <= 0){
-            triangle(r, b.x + 9*bird_size/10, b.y + bird_size/2,//top
-                        b.x + 5*bird_size/10, b.y + bird_size/2,//right
-                        b.x + 9*bird_size/10, b.y + 9*bird_size/10, 1);//down
+            triangle(r, b.x + 9*bird_size/10, animation*b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, animation*b.y + bird_size/2,//right
+                        b.x + 9*bird_size/10, animation*b.y + 9*bird_size/10, 1);//down
         }else{//wing if jumped
-            triangle(r, b.x + 9*bird_size/10, b.y + bird_size/2,//top
-                        b.x + 5*bird_size/10, b.y + bird_size/2,//left
-                        b.x + 9*bird_size/10, b.y + (9 - (*j)/10 )*bird_size/10, 1);//down
+            triangle(r, b.x + 9*bird_size/10, animation*b.y + bird_size/2,//top
+                        b.x + 5*bird_size/10, animation*b.y + bird_size/2,//left
+                        b.x + 9*bird_size/10, animation*b.y + (9 - (*j)/10 )*bird_size/10, 1);//down
             (*j)-= WING_SPEED;
         }
             
@@ -398,12 +400,13 @@ void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p, doubl
     text(r, WIDTH/2 - 8*BUTTON_WIDTH/20, HEIGHT - animation*0.98*BUTTON_HEIGHT, "Reset", f, c[4*p + 3].r, c[4*p + 3].g, c[4*p + 3].b);
 }
 
-void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int spike_size){
+void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int *a, int spike_size){
     *bsp = ORIGINAL_BIRD_SPEED;//if it's upper than 30 may cause bugs
     *g = ORIGINAL_GRAVITY;
     *jp = ORIGINAL_JUMP_PWR;
     *bsz = ORIGINAL_BIRD_SIZE;
     *si = ORIGINAL_SPIKE_INCREASE;
+    *a = ORIGINAL_ANIMATION_SPEED;
     for(int i = 0 ; i < 8 ; i ++)
         cursor_positions[i] = 0;
     cursor_positions[1] = (*bsp)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SPEED);//initialize the speed at 8
@@ -411,11 +414,13 @@ void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*
     cursor_positions[3] = (*jp)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_JUMP);//initialize the jump at 20
     cursor_positions[4] = (*bsz)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(BIRD_MAX_SIZE);//initialize the bird's size at 40
     cursor_positions[5] = (*si)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MIN_SPIKE_DIFFICULTY);//initialize the spike difficulty at 40
+    cursor_positions[6] = (*a)*(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1))/(MAX_ANIMATION_SPEED);//initialize the animation
+
 }
 
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size){
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation){
     background(r, c[4*p+3].r, c[4*p+3].g, c[4*p+3].b, WIDTH, HEIGHT);
-    double text_animation;
+    double text_animation = (*animation)/500.0;
 
     if(*menu <= -1.0){//appear
         text_animation = (*menu) + 2; //from 0 to 1
@@ -425,7 +430,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     if(*menu < -1.0){//animation of entry
         drawBackground(r, lvl, score, c, p, (1-text_animation));
     }
-    if(*menu > -0.5 && *menu <= -0.001)//animation of exit
+    if(*menu > -0.5 && *menu <= -0.00001)//animation of exit
         drawBackground(r, lvl, score, c, p, (1-text_animation));
     
 
@@ -467,8 +472,6 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
         roundRect(r, spike_size/4 + WIDTH/10, text_animation*spike_size*2 + i*HEIGHT/10, WIDTH - 2*(spike_size/4 + WIDTH/10), 10, 1, 20);//line
     color(r, text_animation*c[4*p+1].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p+1].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p+1].b + (1-text_animation)*c[4*p + 3].b, 255);//cursor color
 
-
-
     //========================================================bird speed
     text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 1*HEIGHT/10, "Speed", small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);
     roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[1], (2-text_animation)*spike_size*2 + 1*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
@@ -504,9 +507,10 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 5*HEIGHT/10, tmp, small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);
     //=========================================================
 
-    //=========================================================6th cursor
+    //=========================================================animaton
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 6*HEIGHT/10, "Animation speed", small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);
     roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[6], (2-text_animation)*spike_size*2 + 6*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
-    toChar(tmp, cursor_positions[6]);
+    toChar(tmp, cursor_positions[6]*(MAX_ANIMATION_SPEED+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
     text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 6*HEIGHT/10, tmp, small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);//display a number in front of the setting bar
     //=========================================================
 
@@ -518,30 +522,35 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
 
     //printf("%f\n", text_animation);
     //printf("%f\t", *menu);
-    double animation_speed = 0.1;
+    double animation_speed = (*animation)/500.0;
     if(*menu < -1.0){//update animation of entry
         (*menu)+= animation_speed;
         printRestartButton(r, c, p, 1 - text_animation);
+    }
+    if(*menu < -1.2){
+        printSettingButton(r, c, p, 1- text_animation);
         drawBird(r, b, facing, j, c, p, bird_size, 1-text_animation);
     }
-    if(*menu > -1.0 && *menu < -0.89)
+
+    if(*menu > -1.0 && *menu < - 1+ animation_speed)
         (*menu) = -1.0;
-    if(*menu > -0.5 && *menu <= -0.001){//animation of exit
+    if(*menu > -0.5 && *menu <= -0.00001){//animation of exit
         *menu += animation_speed/2;
         printRestartButton(r, c, p,  1 - text_animation);
+    }
+    if(*menu > -0.3 && *menu <= -0.00001){//animation of exit
+        printSettingButton(r, c, p, 1- text_animation);
         drawBird(r, b, facing, j, c, p, bird_size, 1-text_animation);
     }
-    if(*menu >= -0.01)
+
+    if(*menu >= 0)
         *menu = 0.0;
     
-    
     *birdsize = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+    *animation = cursor_positions[6]*(MAX_ANIMATION_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+    if(*animation < 1)
+        *animation = 1;//avoid freeze
+
     printResetSettingsButton(r, small, c, p, text_animation);
     printReturnButton(r, c, p, text_animation);
 }
-
-
-
-
-
-
