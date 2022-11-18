@@ -22,6 +22,7 @@
 #define ORIGINAL_BIRD_SIZE 40
 #define ORIGINAL_SPIKE_INCREASE 7
 #define ORIGINAL_ANIMATION_SPEED 50
+#define TAIL_LENGTH 12
 
 
 typedef struct{
@@ -49,13 +50,13 @@ void jump(double*y, double*vy, int*sj);
 void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
 void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*score_font, Color*c, int p, double animation);
 void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r, int spike_increase);
-void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p, double bird_size, double animation);
-void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size);
+void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p, double bird_size, double*prev_x, double*prev_y, double animation);
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size, double*prev_x, double*prev_y);
 int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb, double bird_size);
-void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, double*menu, double bird_speed, double bird_size);
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, double*menu, double bird_speed, double*prev_x, double*prev_y, double bird_size);
 void printSettingButton(SDL_Renderer* r, Color*c, int p, double animation);
 void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation);
 void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p, double animation);
 void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int*a, int spike_size);
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int hlvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation);
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int hlvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, double*prev_x, double*prev_y, int *animation);
 void printHighScore(SDL_Renderer* r, TTF_Font*f, char*tmp, int high, Color*c, int p, double animation);
