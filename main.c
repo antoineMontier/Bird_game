@@ -107,7 +107,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
     double bird_speed, gravity, bird_jump_pwr, bird_size;//game parameters
-    int spike_increase;
+    int spike_increase, animation;
 
     int*temp = malloc(NB_SPIKES*sizeof(int));
     for(int i = 0 ;i < NB_SPIKES ; i++){
@@ -123,7 +123,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     char*tmp = malloc(50*sizeof(char));
 
 
-    resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, spike_size);
+    resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, &animation, spike_size);
 
 
     startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
@@ -161,6 +161,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             bird_jump_pwr = cursor_positions[3]*(MAX_JUMP+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             spike_increase = cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            animation = cursor_positions[6]*(MAX_ANIMATION_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
 
 
             moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size);
@@ -174,15 +175,11 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
                menu = 0;
         }else if(menu == 0.0){
-
-            
-
-
             drawBackground(ren, level, score_font, colors, palette, 1);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
             printRestartButton(ren, colors, palette, 1);
-            printSettingButton(ren, colors, palette);
+            printSettingButton(ren, colors, palette, 1);
             if(k){
                 startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
                 k = 0;
@@ -198,7 +195,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 menu = -0.49;
                 re = 0;
             }
-            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size);
+            printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, &animation);
             //printf("\n\nm : %f\n", menu);
         }
 
@@ -245,7 +242,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                                 setting_selectionned = i;
                         }
                         if(rollover(evt.button.x, evt.button.y, WIDTH/2 - BUTTON_WIDTH/2, HEIGHT - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT/2))
-                            resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, spike_size);
+                            resetSettingsAndCursors(cursor_positions, &bird_speed, &gravity, &bird_jump_pwr, &bird_size, &spike_increase, &animation, spike_size);
                     }
                     break;
 
