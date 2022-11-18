@@ -12,7 +12,7 @@
 #define NB_SPIKES 10 
 #define SPIKE_SPACE_PX 20
 #define WING_SPEED 7
-#define BIRD_MAX_SPEED 30
+#define BIRD_MAX_SPEED 20
 #define MAX_GRAVITY 50
 #define MIN_SPIKE_DIFFICULTY 20
 #define MAX_ANIMATION_SPEED 200
@@ -57,4 +57,5 @@ void printSettingButton(SDL_Renderer* r, Color*c, int p, double animation);
 void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation);
 void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p, double animation);
 void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int*a, int spike_size);
-void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation);
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int hlvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation);
+void printHighScore(SDL_Renderer* r, TTF_Font*f, char*tmp, int high, Color*c, int p, double animation);
