@@ -1,43 +1,61 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "SDL_Basics.h"
+
+#define BIRD_MAX_SIZE 200
+#define MAX_JUMP 50
+#define FRAMES_PER_SECOND 36
+#define BUTTON_WIDTH 70
+#define BUTTON_HEIGHT 70
+#define PALETTE 4
+#define NB_SPIKES 10 
+#define SPIKE_SPACE_PX 20
+#define WING_SPEED 7
+#define BIRD_MAX_SPEED 20
+#define MAX_GRAVITY 50
+#define MIN_SPIKE_DIFFICULTY 20
+#define MAX_ANIMATION_SPEED 200
+#define ORIGINAL_BIRD_SPEED 8
+#define ORIGINAL_GRAVITY 9.81
+#define ORIGINAL_JUMP_PWR 20
+#define ORIGINAL_BIRD_SIZE 40
+#define ORIGINAL_SPIKE_INCREASE 7
+#define ORIGINAL_ANIMATION_SPEED 50
 
 
-void SDL_ExitWithError(const char *string);
+typedef struct{
+    double x;
+    double y;
+    double vx;
+    double vy;
+}bird;
 
-void mark(SDL_Renderer* r, int x, int y, int thickness);
+typedef struct{
+    double x;//center x of the spike
+    double y;//center y of the spike
+    double r;//height of the spike
+}spike;
 
-void point(SDL_Renderer* r, int x, int y);
+typedef struct{
+    unsigned int r;//red 0-255
+    unsigned int g;//green 0-255
+    unsigned int b;//blue 0-255
+}Color;
 
-void line(SDL_Renderer* r, int x1, int y1, int x2, int y2);
-
-void color(SDL_Renderer* r, int red, int green, int blue, int alpha);
-
-void rect(SDL_Renderer* r, int x, int y, int width, int height, int filled);
-
-void circle(SDL_Renderer * r, int cx, int cy, int radius, int filled);
-
-void openSDL(int x, int y, int mode, SDL_Window**w, SDL_Renderer**r);
-
-void closeSDL(SDL_Window**w, SDL_Renderer**r);
-
-void background(SDL_Renderer* r, int red, int green, int blue, int w, int h, int p);
-
-int rollover(int mx, int my, int x, int y, int w, int h);
-
-int inTheTriangle(double x1, double y1, double x2, double y2, double x3, double y3, double a, double b);
-
-double min(double a, double b, double c);
-
-double max(double a, double b, double c);
-
-void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, int filled);
-
-void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve);
-
-void setFont(TTF_Font**font, char*font_file, int size);
-
-void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int green, int blue);
-
-void toChar(char*c, int n);
-
-double dist(double x1, double y1, double x2, double y2);
+void drawLandscape(SDL_Renderer* r, Color*c, int p);
+void printRestartButton(SDL_Renderer* r, Color*c, int p, double animation);
+void jump(double*y, double*vy, int*sj);
+void drawSpikes(SDL_Renderer* r, int*s_l, int*s_r, int *spike_nb, double size, double a_l, double a_r, Color*c, int p);
+void drawBackground(SDL_Renderer* r, int lvl, TTF_Font*score_font, Color*c, int p, double animation);
+void spikeUpdate(int *sl, int*sr, int spike_nb, int lvl, double*a_l, double*a_r, int facing, int*u_l, int*u_r, int spike_increase);
+void drawBird(SDL_Renderer* r, bird b, int facing, int*j, Color*c, int p, double bird_size, double animation);
+void moveBird(bird *b, int *facing, int* lvl, int size, double sp_sz, double bird_speed, double gravity, double bird_size);
+int birdTouchSpike(bird b, int facing, int spike_sz, int *s_l, int*s_r, int spike_nb, double bird_size);
+void startGame(bird*b, int*facing, int*pfacing, int*palette, int*lvl, double*a_l, double*a_r, int*u_l, int*u_r, int*s_l, int*s_r, int sn, int*jumped, double*menu, double bird_speed, double bird_size);
+void printSettingButton(SDL_Renderer* r, Color*c, int p, double animation);
+void printReturnButton(SDL_Renderer* r, Color*c, int p, double animation);
+void printResetSettingsButton(SDL_Renderer* r, TTF_Font*f, Color*c, int p, double animation);
+void resetSettingsAndCursors(int*cursor_positions, double*bsp, double*g, double*jp, double*bsz, int*si, int*a, int spike_size);
+void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*score, int*cursor_positions, int spike_size, Color*c, int p, char*tmp, double*birdsize, double*menu, int lvl, int hlvl, int*s_l, int*s_r, int*spike_nb, bird b, int facing, int*j, double bird_size, int *animation);
+void printHighScore(SDL_Renderer* r, TTF_Font*f, char*tmp, int high, Color*c, int p, double animation);
