@@ -98,7 +98,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     bird birdy;
     double app_r = 0;//0 to 21 0 if fully appeared and 21 is dissapeared
     double app_l = 21;                  //-1 if facing left, 1 if facing right
-    double menu = 0;
+    double menu = 0;//-2 to -1 is setting entry animation ; -1 is settings ; -1 to 0 is settings exit animation ; 0 is starting screen ; 0 to 1 is play animation
     int jumped, prev_facing, facing = 1, update_r, update_l, level = 0, high_level = 0, tick_count, palette = rand() % PALETTE , k = 0, s = 0, re = 0, spike_number = NB_SPIKES*2;
     //        0for starting bg
     //        1for play
@@ -152,13 +152,26 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     /*----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     while(program_launched){//principal loop
         SDL_Event evt;
+        if(menu > 1.0 && menu < 2){//play to main screen animation
+            //draw background
+            drawBackground(ren, level, score_font, colors, palette, 1);
+            printHighScore(ren, setting_font_small, tmp, high_level, colors, palette, 1);
 
+            //animated
+            printRestartButton(ren, colors, palette, menu-1);
+            printSettingButton(ren, colors, palette, menu-1);
+            menu += animation/500.0;
+            if(menu >= 1.9 )
+                menu = 0.0;
         
 
+            //draw landscape
+            drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
+            //draw bird
+            drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
+        }
 
-
-
-        if(menu == 1.0){
+        if(menu >0.0 && menu <= 1.0){//playing screen
             //update level
             if(level > high_level)
                 high_level = level;
@@ -169,12 +182,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 update_l = 1;
             prev_facing = facing;
 
-            bird_speed = cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
-            gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
-            bird_jump_pwr = cursor_positions[3]*(MAX_JUMP+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
-            bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
-            spike_increase = cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
-            animation = cursor_positions[6]*(MAX_ANIMATION_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+
 
 
             moveBird(&birdy, &facing, &level, spike_size, spike_size, bird_speed, gravity, bird_size);
@@ -183,13 +191,24 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             drawBackground(ren, level, score_font, colors, palette, 1);
             printHighScore(ren, setting_font_small, tmp, high_level, colors, palette, 1);
 
+            //animated
+            if(menu < 1){
+                printRestartButton(ren, colors, palette, 1-menu);
+                printSettingButton(ren, colors, palette, 1-menu);
+                menu += animation/500.0;
+                if(menu >= 0.9 )
+                    menu = 1.0;
+            }
+
             //draw landscape
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
             //draw bird
             drawBird(ren, birdy, facing, &jumped, colors, palette, bird_size, 1);
             if(birdTouchSpike(birdy, facing, spike_size, s_l, s_r, spike_number, bird_size))
-                menu = 0; 
-            }else if(menu == 0.0){
+                menu = 1.01; 
+
+
+        }else if(menu == 0.0){//starting screen
             drawBackground(ren, level, score_font, colors, palette, 1);
             printHighScore(ren, setting_font_small, tmp, high_level, colors, palette, 1);
             drawSpikes(ren, s_l, s_r, &spike_number, spike_size, app_l, app_r, colors, palette);
@@ -198,6 +217,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             printSettingButton(ren, colors, palette, 1);
             if(k){
                 startGame(&birdy, &facing, &prev_facing, &palette, &level, &app_l, &app_r, &update_l, &update_r, s_l, s_r, spike_number, &jumped, &menu, bird_speed, bird_size);
+                menu = 0.01;
                 k = 0;
             }
             if(s){
@@ -212,6 +232,14 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
                 re = 0;
             }
             printSettingMenu(ren, setting_font_big, setting_font_small, score_font, cursor_positions, spike_size, colors, palette, tmp, &bird_size, &menu, level, high_level, s_r, s_l, &spike_number, birdy, facing, &jumped, bird_size, &animation);
+            //apply changes
+            bird_speed = cursor_positions[1]*(BIRD_MAX_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            gravity = cursor_positions[2]*(MAX_GRAVITY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            bird_jump_pwr = cursor_positions[3]*(MAX_JUMP+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            spike_increase = cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            animation = cursor_positions[6]*(MAX_ANIMATION_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            
             if(level == 0){
                 birdy.x = WIDTH/2 - bird_size/2;
             }
@@ -246,7 +274,7 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
 
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if(menu == 1.0){
+                    if(menu > 0 && menu <= 1.0){
                         birdy.vy = -bird_jump_pwr;
                         jumped = 90;
                     }
