@@ -542,7 +542,7 @@ void printSettingMenu(SDL_Renderer* r, TTF_Font*big, TTF_Font*small, TTF_Font*sc
     //=========================================================
         
     //=========================================================bird size
-    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 4*HEIGHT/10, "Size", small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);
+    text(r, text_animation*(spike_size/4 + WIDTH/10), spike_size*1.5 + 4*HEIGHT/10, "size", small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);
     roundRect(r, spike_size/4 + WIDTH/10 + cursor_positions[4], (2-text_animation)*spike_size*2 + 4*HEIGHT/10 - 5, 10, 20, 1, 20);//cursor
     toChar(tmp, cursor_positions[4]*(BIRD_MAX_SIZE+2)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1)));
     text(r, WIDTH - text_animation*1.8*WIDTH/10, 4.3*spike_size/2 + 4*HEIGHT/10, tmp, small, text_animation*c[4*p + 2].r + (1-text_animation)*c[4*p + 3].r , text_animation*c[4*p + 2].g + (1-text_animation)*c[4*p + 3].g, text_animation*c[4*p + 2].b + (1-text_animation)*c[4*p + 3].b);
