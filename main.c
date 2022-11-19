@@ -245,6 +245,8 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
             bird_size = cursor_positions[4]*(BIRD_MAX_SIZE+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             spike_increase = cursor_positions[5]*(MIN_SPIKE_DIFFICULTY+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
             animation = cursor_positions[6]*(MAX_ANIMATION_SPEED+1)/(WIDTH - 2*(spike_size/4 + WIDTH/10 + 1));
+            if(animation < 1)
+                animation = 1;
             
             if(level == 0){
                 birdy.x = WIDTH/2 - bird_size/2;
