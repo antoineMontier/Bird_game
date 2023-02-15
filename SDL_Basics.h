@@ -41,3 +41,4 @@ void text(SDL_Renderer*r, int x, int y, char*text, TTF_Font*font, int red, int g
 void toChar(char*c, int n);
 
 double dist(double x1, double y1, double x2, double y2);
+
