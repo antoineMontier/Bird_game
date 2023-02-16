@@ -31,7 +31,6 @@ typedef struct{
     double vx;
     double vy;
 }bird;
-
 typedef struct{
     double x;//center x of the spike
     double y;//center y of the spike
