@@ -2,8 +2,6 @@
 # source files list
 
 SRC = $(wildcard *.c)
-
-
 OBJ = $(addprefix build/,$(SRC:.c=.o))
 DEP = $(addprefix build/,$(SRC:.c=.d))
 
