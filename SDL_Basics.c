@@ -152,6 +152,7 @@ void triangle(SDL_Renderer* r, int x1, int y1, int x2, int y2, int x3, int y3, i
     }
 }
 
+
 void roundRect(SDL_Renderer* r, int x, int y, int width, int height, int filled, int curve){
     if(curve <= 0){
         if(filled){
