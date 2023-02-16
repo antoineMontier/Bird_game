@@ -79,7 +79,6 @@ int main(int argc, char *args[]){//compile and execute with     gcc main.c -o ma
     colors[15].b = 100;
 
     
-
     SDL_Window *w;//open a window command
     SDL_Renderer *ren;//render creation
     TTF_Font *score_font;//font for score display
