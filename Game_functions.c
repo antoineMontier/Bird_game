@@ -10,6 +10,7 @@ void drawLandscape(SDL_Renderer* r, Color*c, int p){
     
 }
 
+
 void printRestartButton(SDL_Renderer* r, Color*c, int p, double animation){
     if(animation == 0.0)
         return;
