@@ -25,6 +25,7 @@
 #define TAIL_LENGTH 12
 
 
+
 typedef struct{
     double x;
     double y;
